@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.App {
+	width: 100vw;
+	height: 100%;
+}
+
+table {
+	border: 3px solid black;
+	max-width: 100%;
+	width: 100%;
+	/* border-collapse: collapse; */
+}
+
+th,
+td {
+	border: 1px solid black;
+	min-width: 20px;
+}
+
+.emptyRow td {
+	min-width: 20px;
+	min-height: 20px;
+}
