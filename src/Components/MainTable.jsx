@@ -18,6 +18,15 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 
 	// console.log(tableData);
 
+	const test1 = async () => {
+		const response = await axios.put(
+			`${UPDATE_DAILY_HOURS_API}/2`,
+			JSON.stringify({
+				hours: 3,
+			})
+		);
+	};
+
 	const handleInputChange = async (rowIndex, columnName, value) => {
 		setTableData((prevTableData) => {
 			const newTableData = [...prevTableData];
@@ -356,7 +365,10 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 			>
 				Add Row
 			</button>
-			<button className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'>
+			<button
+				onClick={test1}
+				className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'
+			>
 				Submit
 			</button>
 		</div>
