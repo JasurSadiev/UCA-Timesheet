@@ -2,11 +2,20 @@ import React, { useState, useEffect, useLayoutEffect } from "react";
 import axios from "../api/axios";
 import { v4 as uuidv4 } from "uuid";
 
-const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
-	const [rowCount, setRowCount] = useState(tableData[0].records.length); // Initial number of rows
+const MyTable = ({
+	tableData,
+	setTableData,
+	getTimeSheet,
+	timeSheet,
+	isOpen,
+	setisOpen,
+	order,
+	setOrder,
+}) => {
+	const [rowCount, setRowCount] = useState(tableData[0].records.length || 0); // Initial number of rows
 	const [comments, setComments] = useState(tableData[0].comment);
 	const [totalHours, setTotalHours] = useState(
-		Array(tableData[0].records.length).fill(0)
+		Array(tableData[0].records.length || 0).fill(0)
 	);
 	const [tableTotalHours, setTableTotalHours] = useState(0);
 
@@ -14,18 +23,24 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 	const randomId = uuidv4();
 
 	const UPDATE_DAILY_HOURS_API = "/daily-hours";
-	const NEW_RECORD_API = "/records";
 
 	// console.log(tableData);
 
-	const test1 = async () => {
-		const response = await axios.put(
-			`${UPDATE_DAILY_HOURS_API}/2`,
-			JSON.stringify({
-				hours: 3,
-			})
-		);
-	};
+	function modalState() {
+		setisOpen(!isOpen);
+	}
+
+	function test1() {
+		axios.post("/orders", {
+			balance: 5000,
+			description: "test1",
+			end_date: "2006-12-02T15:04:05Z",
+			grant_description: "test1",
+			grant_id: "113",
+			id: 444,
+			start_date: "2006-01-02T15:04:05Z",
+		});
+	}
 
 	const handleInputChange = async (rowIndex, columnName, value) => {
 		setTableData((prevTableData) => {
@@ -38,7 +53,7 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 		try {
 			const daily_hours_id =
 				tableData[0].records[rowIndex].daily_hours[columnName - 1]
-					.daily_hours_id;
+					.daily_hours_id || "";
 			// console.log(value);
 			const response = await axios.put(
 				`${UPDATE_DAILY_HOURS_API}/${daily_hours_id}`,
@@ -51,7 +66,7 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 				}
 			);
 
-			console.log("Update Successful", respontableData);
+			console.log("Update Successful");
 			// Handle success, update state, or perform other actions
 		} catch (error) {
 			console.error("Error updating data", error);
@@ -61,13 +76,13 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 
 	useEffect(() => {
 		generateTableData(tableData[0].records.length, 31);
-		setRowCount(tableData[0].records.length);
+		setRowCount(tableData[0].records.length || 0);
 	}, [tableData]);
 	// console.log(tableTotal);
 
 	useEffect(() => {
 		let rows_total_hours = Array(tableData[0].records.length).fill(0);
-
+		console.log("hello");
 		for (let j = 0; j < tableData[0].records.length; j++) {
 			let hours = tableData[0].records[j].daily_hours;
 			for (let i = 0; i < hours.length; i++) {
@@ -102,30 +117,32 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 		calculateTotals();
 	}, [tableData, tableTotalHours, totalHours]);
 
-	const NewRecord = async (e) => {
-		const timesheetId = tableData[0].timesheet_id;
-		const orderId = tableData[0].records[0].order_id;
-		const randomNumber = Math.floor(Math.random() * 100000) + 1;
-		try {
-			const response = await axios.post(
-				NEW_RECORD_API,
-				JSON.stringify({
-					timesheet_id: timesheetId,
-					external_id: randomNumber,
-					order_id: orderId,
-				}),
-				{
-					headers: { "Content-Type": "application/json" },
-					withCredentials: true,
-				}
-			);
-			console.log(JSON.stringify(response?.data));
-			getTimeSheet(true);
-			window.location.reload();
-		} catch (error) {
-			console.log(error);
-		}
-	};
+	// const NewRecord = async (e) => {
+	// 	const timesheetId = tableData[0].timesheet_id;
+	// 	const orderId = order.orderId;
+	// 	const randomNumber = Math.floor(Math.random() * 100000) + 1;
+	// 	const randomNumber2 = Math.floor(Math.random() * 100000) + 1;
+	// 	console.log(timesheetId, orderId, randomNumber);
+	// 	try {
+	// 		const response = await axios.post(
+	// 			NEW_RECORD_API,
+	// 			JSON.stringify({
+	// 				timesheet_id: timesheetId,
+	// 				external_id: randomNumber,
+	// 				order_id: orderId,
+	// 			}),
+	// 			{
+	// 				headers: { "Content-Type": "application/json" },
+	// 				withCredentials: true,
+	// 			}
+	// 		);
+	// 		console.log(JSON.stringify(response?.data));
+	// 		getTimeSheet(true);
+	// 		// window.location.reload();
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	}
+	// };
 
 	const generateFirstRowHeaders = () => {
 		const headers = [
@@ -360,13 +377,15 @@ const MyTable = ({ tableData, setTableData, getTimeSheet, timeSheet }) => {
 				</tfoot>
 			</table>
 			<button
-				onClick={NewRecord}
+				// onClick={NewRecord}
+				onClick={setisOpen}
 				className='px-4 py-1 bg-blue-500 text-white self mr-10 mt-4'
 			>
 				Add Row
 			</button>
 			<button
-				onClick={test1}
+				onClick={setisOpen}
+				// onClick={test1}
 				className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'
 			>
 				Submit

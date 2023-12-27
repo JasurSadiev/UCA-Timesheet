@@ -4,10 +4,15 @@ import InputDate from "../Components/TableComponents/InputDate";
 import InputText from "../Components/TableComponents/InputText";
 import MainTable from "../Components/MainTable";
 import Navbar from "../Components/Navbar";
+import AddRowModal from "../Components/AddRowModal";
 
 const TablePage = () => {
-	const [tableDate, setTableDate] = useState("");
+	const [tableData, setTableData] = useState("");
 	const [timeSheet, setTimeSheet] = useState(false);
+	const [isOpen, setisOpen] = useState(false);
+	const [order, setOrder] = useState("");
+	const NEW_RECORD_API = "/records";
+
 	useEffect(() => {
 		const apiUrl = "/timesheets";
 
@@ -16,7 +21,8 @@ const TablePage = () => {
 			.get(apiUrl)
 			.then((response) => {
 				// console.log("Response from server:", response.data);
-				setTableDate(response.data);
+				setTableData(response.data);
+				console.log(response.data);
 				// Handle the response as needed
 			})
 			.catch((error) => {
@@ -25,12 +31,39 @@ const TablePage = () => {
 			});
 	}, [timeSheet]);
 
-	if (!tableDate || tableDate.length === 0) {
+	const NewRecord = async () => {
+		const timesheetId = tableData[0].timesheet_id;
+		const orderId = order.orderId;
+		const randomNumber = Math.floor(Math.random() * 100000) + 1;
+		const randomNumber2 = Math.floor(Math.random() * 100000) + 1;
+		console.log(timesheetId, orderId, randomNumber);
+		try {
+			const response = await axios.post(
+				NEW_RECORD_API,
+				JSON.stringify({
+					timesheet_id: timesheetId,
+					external_id: randomNumber,
+					order_id: orderId,
+				}),
+				{
+					headers: { "Content-Type": "application/json" },
+					withCredentials: true,
+				}
+			);
+			console.log(JSON.stringify(response?.data));
+			getTimeSheet(true);
+			// window.location.reload();
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	if (!tableData || tableData.length === 0) {
 		// If data is still loading or there is no data, you can render a loading spinner or a message.
 		return <p>Loading...</p>;
 	}
 
-	// console.log(tableDate[0].author.city);
+	// console.log(tableData[0].author.city);
 
 	return (
 		<div className='flex flex-col px-4 max-w-screen'>
@@ -41,7 +74,7 @@ const TablePage = () => {
 			<div className='flex justify-between'>
 				<InputText
 					labelText={"DUTY STATION"}
-					value={tableDate[0].author.city}
+					value={tableData[0].author.city}
 				/>
 				<div className='flex flex-col text-center mb-8'>
 					<h3 className='text-xl font-semibold'>MONTHLY TIME SHEET</h3>
@@ -49,28 +82,39 @@ const TablePage = () => {
 				</div>
 				<InputText
 					labelText={"POSITION"}
-					value={tableDate[0].author.position}
+					value={tableData[0].author.position}
 				/>
 			</div>
 			<div className='flex justify-between'>
 				<InputText
 					labelText={"EMPLOYEE NAME (PLEASE PRINT)"}
-					value={`${tableDate[0].author.first_name} ${tableDate[0].author.last_name}`}
+					value={`${tableData[0].author.first_name} ${tableData[0].author.last_name}`}
 				/>
 				<div className='flex gap-x-4'>
-					<InputDate labelText={"month"} value={tableDate[0].month} />
-					<InputDate labelText={"year"} value={tableDate[0].year} />
+					<InputDate labelText={"month"} value={tableData[0].month} />
+					<InputDate labelText={"year"} value={tableData[0].year} />
 				</div>
 				<InputText
 					labelText={"DEPARTMENT"}
-					value={tableDate[0].author.department}
+					value={tableData[0].author.department}
 				/>
 			</div>
+			<AddRowModal
+				isOpen={isOpen}
+				onClose={setisOpen}
+				order={order}
+				setOrder={setOrder}
+				newRecord={NewRecord}
+			/>
 			<MainTable
-				tableData={tableDate}
-				setTableData={setTableDate}
+				tableData={tableData}
+				setTableData={setTableData}
 				getTimeSheet={setTimeSheet}
 				timeSheet={timeSheet}
+				isOpen={isOpen}
+				setisOpen={setisOpen}
+				order={order}
+				setOrder={setOrder}
 			/>
 		</div>
 	);

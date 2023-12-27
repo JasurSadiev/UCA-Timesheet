@@ -1,5 +1,5 @@
 import axios from "axios";
-const BASE_URL = "http://10.121.4.116:8080/";
+const BASE_URL = "https://ilkhom19.jprq.app/";
 
 export default axios.create({
 	baseURL: BASE_URL,
