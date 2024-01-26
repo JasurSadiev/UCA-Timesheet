@@ -3,17 +3,16 @@ import { Link } from "react-router-dom";
 
 const Nav = () => {
 	return (
-		<div>
+		<div className='bg-black text-white flex justify-between items-center'>
 			<div>
 				<img src='' alt='' />
-				<h1>
-					University <br />
-					of Central Asia
+				<h1 className='text-[32px] font-mono text-blue-100 ml-[50px] font-bold'>
+					UNIVERSITY <br /> OF CENTRAL ASIA
 				</h1>
 			</div>
-			<div>
-				<ul>
-					<li>
+			<div className='mr-20'>
+				<ul className='flex gap-x-10'>
+					<li className=''>
 						<Link>HOME</Link>
 					</li>
 					<li>

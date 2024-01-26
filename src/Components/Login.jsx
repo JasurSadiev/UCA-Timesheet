@@ -1,17 +1,19 @@
 import { useRef, useState, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+
 import "../Temp.css";
 import axios from "../api/axios";
 const LOGIN_URL = "/auth/sign-in";
 const USER_INFO_URL = "/user/me";
 
-const Login = () => {
-	const { setAuth } = useAuth();
+const Login = ({ setAccessToken }) => {
+	const { auth, setAuth } = useAuth();
+	const accessToken = auth.accessToken;
 
 	const navigate = useNavigate();
 	const location = useLocation();
-	const from = "/";
+	const from = "/my-tables";
 
 	const emailRef = useRef();
 	const errRef = useRef();
@@ -28,6 +30,31 @@ const Login = () => {
 		setErrMsg("");
 	}, [email, password]);
 
+	// const Register = async (e) => {
+	// 	e.preventDefault();
+	// 	try {
+	// 		const response = await axios.post(
+	// 			"auth/sign-up",
+	// 			JSON.stringify({
+	// 				email: "jasursadiev2002@gmail.com",
+	// 				first_name: "Jasurbek",
+	// 				is_admin: false,
+	// 				last_name: "Sadiev",
+	// 				sap_id: "2120212",
+	// 				manager_id: 10,
+	// 				shift_id: 1,
+	// 				password: "qazzaq",
+	// 				city: "Bishkek",
+	// 				department: "SAS",
+	// 				position: "Developer",
+	// 			})
+	// 		);
+	// 		console.log(response);
+	// 	} catch (error) {
+	// 		console.log("error");
+	// 	}
+	// };
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
@@ -40,27 +67,19 @@ const Login = () => {
 					withCredentials: true,
 				}
 			);
-			console.log(JSON.stringify(response?.data));
-			//console.log(JSON.stringify(response));
-			const accessToken = response?.data?.accessToken;
-			setAuth({ email, password, accessToken });
+			const accessToken = response?.data?.access_token;
+			// console.log(accessToken);
+			setAuth({ accessToken });
 			setEmail("");
 			setPassword("");
 
-			// try {
-			// 	const response = await axios.get(USER_INFO_URL, {
-			// 		headers: {
-			// 			Authorization: `Bearer ${accessToken}`,
-			// 			"Content-Type": "application/json",
-			// 		},
-			// 		withCredentials: true,
-			// 	});
-			// 	console.log(JSON.stringify(response?.data));
-			// } catch (error) {
-			// 	console.log(error);
-			// 	errRef.current.focus();
-			// }
-			// const roles = response?.data?.roles;
+			// axios.put(USER_INFO_URL, JSON.stringify({ manager_id: 2 }), {
+			// 	headers: {
+			// 		Authorization: `Bearer ${accessToken}`,
+			// 		"Content-Type": "application/json",
+			// 	},
+			// 	withCredentials: true,
+			// });
 
 			navigate(from, { replace: true });
 		} catch (err) {

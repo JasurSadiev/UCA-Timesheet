@@ -11,6 +11,8 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 		orderId: "",
 	});
 
+	console.log(selectedOrder);
+
 	async function getOrders() {
 		try {
 			const response = await axios.get(ORDERSAPI, {
@@ -18,18 +20,23 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 				withCredentials: true,
 			});
 			setOrders(response.data);
-			setSelectedOrder({
-				orderName: orders[0].grant_description,
-				orderId: orders[0].id,
-			});
-			console.log(selectedOrder);
 		} catch (error) {
 			console.log(error);
 		}
 	}
 
 	useEffect(() => {
+		// const setInitialSelectedOrder = () => {
+		// 	if (orders.length > 0) {
+		// 		setSelectedOrder({
+		// 			orderName: orders[0].grant_description,
+		// 			orderId: orders[0].id,
+		// 		});
+		// 	}
+		// };
+
 		getOrders();
+		// setInitialSelectedOrder();
 	}, [isOpen]);
 
 	const handleDropdownChange = (dropdown, value) => {
@@ -37,32 +44,20 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 			(element) => element.grant_description === value
 		)?.id;
 
-		setSelectedOrder({
+		setSelectedOrder((prevSelectedOrder) => ({
+			...prevSelectedOrder,
 			orderName: value,
-			orderId: selectedOrderId, // If the option is not found, set orderId to an empty string or handle it as needed
-		});
+			orderId: selectedOrderId || "", // Handle the case where selectedOrderId is undefined
+		}));
 
-		console.log(selectedOrder);
+		// Log the state after it has been updated
 	};
 
 	const handleSubmit = () => {
-		// Find the selected order based on orderName
-		const currentOrder = orders.find(
-			(element) => element.grant_description === selectedOrder.orderName
-		);
+		setOrder(selectedOrder);
 
-		// Check if the selected order is found
-		if (currentOrder) {
-			// Set selectedOrder with orderName and orderId
-			setSelectedOrder({
-				orderName: selectedOrder.orderName,
-				orderId: currentOrder.id,
-			});
-			setOrder(selectedOrder);
-
-			// Perform any other actions with selectedOrder if needed
-			// console.log("Selected Options:", selectedOrder);
-		}
+		// Perform any other actions with selectedOrder if needed
+		// console.log("Selected Options:", selectedOrder);
 
 		// Close the modal
 		onClose();
@@ -103,6 +98,7 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 									}
 									className='w-full p-2 border border-gray-300 rounded'
 								>
+									<option value=''></option>
 									{/* Add your dropdown options here */}
 									{orders.map((element) => (
 										<option

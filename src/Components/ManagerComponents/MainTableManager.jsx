@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
-import axios from "../api/axios";
+import axios from "../../api/axios";
 import { v4 as uuidv4 } from "uuid";
 
-const MyTable = ({
+const MainTableManager = ({
 	tableData,
 	setTableData,
 	getTimeSheet,
@@ -13,9 +12,6 @@ const MyTable = ({
 	setisOpen,
 	order,
 	setOrder,
-	currentTimesheetId,
-	accessToken,
-	days,
 }) => {
 	const [rowCount, setRowCount] = useState(
 		tableData.records ? tableData.records.length : 0
@@ -26,48 +22,27 @@ const MyTable = ({
 	const [totalHours, setTotalHours] = useState(
 		Array(tableData.records ? tableData.records.length : 0).fill(0)
 	);
+	console.log("hello");
 	const [tableTotalHours, setTableTotalHours] = useState(0);
 
-	const [tableTotal, setTableTotal] = useState(Array(days + 2).fill(0));
+	const [tableTotal, setTableTotal] = useState(Array(33).fill(0));
 	const randomId = uuidv4();
-	const navigate = useNavigate();
 
 	const UPDATE_DAILY_HOURS_API = "/daily-hours";
-	const SUBMITTIMESHEET = `/timesheets/submit/${currentTimesheetId}`;
 
 	function modalState() {
 		setisOpen(!isOpen);
 	}
 
-	function submitTimesheet() {
-		axios
-			.post(
-				SUBMITTIMESHEET,
-				{},
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
-					},
-					withCredentials: true,
-				}
-			)
-			.then((response) => {
-				console.log(response);
-				navigate("/my-timesheets");
-			});
-	}
-
 	const handleInputChange = async (rowIndex, columnName, value) => {
 		setTableData((prevTableData) => {
 			const newTableData = JSON.parse(JSON.stringify(prevTableData));
-			// console.log(`hello ${newTableData}`);
+			console.log(`hello ${newTableData}`);
 
 			newTableData.records[rowIndex].daily_hours[columnName - 1].hours =
 				value || "";
 			return newTableData;
 		});
-
 		try {
 			const daily_hours_id =
 				tableData.records[rowIndex].daily_hours[columnName - 1]
@@ -92,8 +67,7 @@ const MyTable = ({
 	};
 
 	useEffect(() => {
-		generateTableData(tableData.records ? tableData.records.length : 0, days);
-
+		generateTableData(tableData.records ? tableData.records.length : 0, 31);
 		setRowCount(tableData.records ? tableData.records.length : 0);
 	}, [tableData]);
 
@@ -119,7 +93,7 @@ const MyTable = ({
 	useLayoutEffect(() => {
 		function calculateTotals() {
 			if (tableData.records) {
-				let currentTotals = Array(days + 2).fill(0);
+				let currentTotals = Array(33).fill(0);
 				for (let j = 0; j < tableData.records.length; j++) {
 					let hours = tableData.records[j].daily_hours;
 					for (let i = 0; i < hours.length; i++) {
@@ -166,7 +140,7 @@ const MyTable = ({
 		const headers = [
 			"Charging Code/Project",
 			"Hours",
-			...Array.from({ length: days }, (_, index) => index + 1),
+			...Array.from({ length: 31 }, (_, index) => index + 1),
 		];
 
 		return headers.map((header, index) => (
@@ -205,7 +179,7 @@ const MyTable = ({
 					{header}
 				</th>
 			)),
-			...Array.from({ length: days + 1 }).map((_, index) => (
+			...Array.from({ length: 32 }).map((_, index) => (
 				<td key={headers.length + index} className=' text-[12px] bg-gray-300'>
 					<input
 						type='text'
@@ -375,14 +349,14 @@ const MyTable = ({
 	};
 
 	return (
-		<div className=' max-w-screen mt-[50px]'>
+		<div className=' max-w-screen mt-[50px] pb-10'>
 			<table className='max-w-screen'>
 				<thead>
 					<tr>{generateFirstRowHeaders()}</tr>
 					<tr>{generateSecondRowHeaders()}</tr>
 				</thead>
 				<tbody>
-					{tableData.records && generateTableData(rowCount, days)}
+					{tableData.records && generateTableData(rowCount, 31)}
 
 					{generateTotalRow()}
 				</tbody>
@@ -399,22 +373,8 @@ const MyTable = ({
 					</tr>
 				</tfoot>
 			</table>
-			<button
-				// onClick={NewRecord}
-				onClick={setisOpen}
-				className='px-4 py-1 bg-blue-500 text-white self mr-10 mt-4'
-			>
-				Add Row
-			</button>
-			<button
-				onClick={submitTimesheet}
-				// onClick={test1}
-				className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'
-			>
-				Submit
-			</button>
 		</div>
 	);
 };
 
-export default MyTable;
+export default MainTableManager;
