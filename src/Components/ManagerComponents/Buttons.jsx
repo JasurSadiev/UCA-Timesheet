@@ -4,7 +4,7 @@ import Reject from "./Reject";
 
 const Buttons = ({ currentTimesheetIdManager, accessToken }) => {
 	return (
-		<div className='flex gap-x-10 justify-center w-[90%] ml-[5%] pb-10 bg-white'>
+		<div className='flex gap-x-10 justify-center w-[screen] pb-10 bg-white'>
 			<Approve
 				currentTimesheetIdManager={currentTimesheetIdManager}
 				accessToken={accessToken}

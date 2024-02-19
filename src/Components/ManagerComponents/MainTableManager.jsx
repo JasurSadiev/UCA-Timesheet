@@ -2,6 +2,7 @@ import React, { useState, useEffect, useLayoutEffect } from "react";
 
 import axios from "../../api/axios";
 import { v4 as uuidv4 } from "uuid";
+import { getWeekOfDay } from "../HolidaysAndWeekends";
 
 const MainTableManager = ({
 	tableData,
@@ -12,6 +13,9 @@ const MainTableManager = ({
 	setisOpen,
 	order,
 	setOrder,
+	days,
+	currentTimesheetIdManager,
+	accessToken,
 }) => {
 	const [rowCount, setRowCount] = useState(
 		tableData.records ? tableData.records.length : 0
@@ -22,11 +26,9 @@ const MainTableManager = ({
 	const [totalHours, setTotalHours] = useState(
 		Array(tableData.records ? tableData.records.length : 0).fill(0)
 	);
-	console.log("hello");
 	const [tableTotalHours, setTableTotalHours] = useState(0);
 
-	const [tableTotal, setTableTotal] = useState(Array(33).fill(0));
-	const randomId = uuidv4();
+	const [tableTotal, setTableTotal] = useState(Array(days + 2).fill(0));
 
 	const UPDATE_DAILY_HOURS_API = "/daily-hours";
 
@@ -37,7 +39,6 @@ const MainTableManager = ({
 	const handleInputChange = async (rowIndex, columnName, value) => {
 		setTableData((prevTableData) => {
 			const newTableData = JSON.parse(JSON.stringify(prevTableData));
-			console.log(`hello ${newTableData}`);
 
 			newTableData.records[rowIndex].daily_hours[columnName - 1].hours =
 				value || "";
@@ -67,7 +68,8 @@ const MainTableManager = ({
 	};
 
 	useEffect(() => {
-		generateTableData(tableData.records ? tableData.records.length : 0, 31);
+		generateTableData(tableData.records ? tableData.records.length : 0, days);
+
 		setRowCount(tableData.records ? tableData.records.length : 0);
 	}, [tableData]);
 
@@ -93,7 +95,7 @@ const MainTableManager = ({
 	useLayoutEffect(() => {
 		function calculateTotals() {
 			if (tableData.records) {
-				let currentTotals = Array(33).fill(0);
+				let currentTotals = Array(days + 2).fill(0);
 				for (let j = 0; j < tableData.records.length; j++) {
 					let hours = tableData.records[j].daily_hours;
 					for (let i = 0; i < hours.length; i++) {
@@ -140,13 +142,18 @@ const MainTableManager = ({
 		const headers = [
 			"Charging Code/Project",
 			"Hours",
-			...Array.from({ length: 31 }, (_, index) => index + 1),
+			...Array.from({ length: days }, (_, index) => index + 1),
 		];
 
 		return headers.map((header, index) => (
 			<th
 				key={index}
-				className={`text-[14px]`}
+				className={getWeekOfDay(
+					index - 1,
+					tableData.year,
+					tableData.month,
+					tableData.author.city
+				)}
 				colSpan={`${index === 0 ? "7" : "1"}`}
 			>
 				{header}
@@ -179,7 +186,7 @@ const MainTableManager = ({
 					{header}
 				</th>
 			)),
-			...Array.from({ length: 32 }).map((_, index) => (
+			...Array.from({ length: days + 1 }).map((_, index) => (
 				<td key={headers.length + index} className=' text-[12px] bg-gray-300'>
 					<input
 						type='text'
@@ -317,18 +324,22 @@ const MainTableManager = ({
 				{/* Add input fields for the remaining columns */}
 				{Array.from({ length: numColumns }, (_, colIndex) => (
 					<td key={colIndex} className=''>
-						<input
+						<p
 							type='text'
 							value={
 								tableData.records[rowIndex].daily_hours[colIndex].hours
 									? tableData.records[rowIndex].daily_hours[colIndex].hours
-									: 0
+									: ""
 							}
 							onChange={(e) =>
 								handleInputChange(rowIndex, colIndex + 1, e.target.value)
 							}
 							className='w-[100%] h-[20px] focus:border-none active:border-none focus:outline-none text-center text-[14px]'
-						/>
+						>
+							{tableData.records[rowIndex].daily_hours[colIndex].hours
+								? tableData.records[rowIndex].daily_hours[colIndex].hours
+								: ""}
+						</p>
 					</td>
 				))}
 			</tr>
@@ -345,6 +356,25 @@ const MainTableManager = ({
 	// };
 
 	const handleCommentsChange = (e) => {
+		axios
+			.put(
+				`/timesheets/${currentTimesheetIdManager}`,
+				{ comment: e.target.value },
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+					withCredentials: true,
+				}
+			)
+			.then((response) => {
+				console.log(response);
+				// fetchUpdatedTimesheets();
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 		setComments(e.target.value);
 	};
 
@@ -356,7 +386,7 @@ const MainTableManager = ({
 					<tr>{generateSecondRowHeaders()}</tr>
 				</thead>
 				<tbody>
-					{tableData.records && generateTableData(rowCount, 31)}
+					{tableData.records && generateTableData(rowCount, days)}
 
 					{generateTotalRow()}
 				</tbody>

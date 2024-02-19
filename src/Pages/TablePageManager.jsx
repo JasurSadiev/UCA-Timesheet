@@ -10,6 +10,7 @@ import useAuth from "../hooks/useAuth";
 
 const TablePageManager = ({ currentTimesheetIdManager }) => {
 	const [tableData, setTableData] = useState("");
+	const [days, setDays] = useState(30);
 	const [timeSheet, setTimeSheet] = useState(false);
 	const [isOpen, setisOpen] = useState(false);
 	const [order, setOrder] = useState("");
@@ -34,6 +35,11 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 			.then((response) => {
 				// console.log("Response from server:", response.data);
 				setTableData(response.data);
+				setDays(
+					response.data.records && response.data.records[0]
+						? response.data.records[0].daily_hours.length
+						: 30
+				);
 				// Handle the response as needed
 			})
 			.catch((error) => {
@@ -60,8 +66,7 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 					withCredentials: true,
 				}
 			);
-			console.log(JSON.stringify(response?.data));
-			getTimeSheet(true);
+			// getTimeSheet(true);
 			// window.location.reload();
 		} catch (error) {
 			console.log(error);
@@ -94,7 +99,7 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 			<div className='flex justify-between'>
 				<InputText
 					labelText={"EMPLOYEE NAME (PLEASE PRINT)"}
-					value={`${tableData.author.first_name} ${tableData.author.last_name}`}
+					value={`${tableData.author.first_name} ${tableData.author.last_name} ID: ${tableData.author.user_id}`}
 				/>
 				<div className='flex gap-x-4'>
 					<InputDate labelText={"month"} value={tableData.month} />
@@ -121,6 +126,9 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 				setisOpen={setisOpen}
 				order={order}
 				setOrder={setOrder}
+				days={days}
+				currentTimesheetIdManager={currentTimesheetIdManager}
+				accessToken={auth.accessToken}
 			/>
 		</div>
 	);

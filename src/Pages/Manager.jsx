@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import Nav from "../Components/ManagerComponents/Nav";
 import Review from "../Components/ManagerComponents/Review";
 import Buttons from "../Components/ManagerComponents/Buttons";
 import axios from "../api/axios";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../Components/Navbar";
 
 const Manager = ({ currentTimesheetIdManager }) => {
 	const [timesheets, setTimesheets] = useState(null);
@@ -32,14 +32,16 @@ const Manager = ({ currentTimesheetIdManager }) => {
 	}, []);
 
 	return (
-		<div className='w-screen h-[100vh] bg-sky-600'>
-			<Nav />
+		<div className='w-screen min-h-screen overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
+			<Navbar />
 			{/* <WelcomeBack /> */}
 			<Review currentTimesheetIdManager={currentTimesheetIdManager} />
-			<Buttons
-				currentTimesheetIdManager={currentTimesheetIdManager}
-				accessToken={accessToken}
-			/>
+			{timesheets.status !== "approved" && (
+				<Buttons
+					currentTimesheetIdManager={currentTimesheetIdManager}
+					accessToken={accessToken}
+				/>
+			)}
 		</div>
 	);
 };

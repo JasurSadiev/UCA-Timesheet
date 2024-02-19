@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 import useAuth from "../hooks/useAuth";
-import { Logout } from "../Components/Navbar";
+import Navbar, { Logout } from "../Components/Navbar";
 
 const ListOfTimesheetsManager = ({ setCurrentTimesheetIdManager }) => {
 	const [timesheets, setTimesheets] = useState(null);
@@ -34,44 +34,69 @@ const ListOfTimesheetsManager = ({ setCurrentTimesheetIdManager }) => {
 		fetchUpdatedTimesheets();
 	}, [accessToken]);
 
+	function statusColor(status) {
+		if (status == "draft") {
+			return "bg-[#C5DAFB] text-[#428AF8]";
+		} else if (status == "approved") {
+			return "bg-[#D1FAE5] text-[#3A9E75]";
+		} else if (status == "rejected") {
+			return "bg-[#FFD0D0] text-[#EF4444]";
+		} else {
+			return "bg-[#FEF3C7] text-[#E07706]";
+		}
+	}
+
 	return (
-		<div className='w-screen flex flex-col'>
-			<h1 className='text-center text-2xl font-bold mb-[100px]'>
+		<div className='w-screen flex flex-col bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700] min-h-screen'>
+			<Navbar />
+			<h1 className='text-center mt-8 text-2xl font-bold mb-[100px]'>
 				Pending Timesheets
 			</h1>
-			<div className='absolute flex self-end w-full text-center my-auto mt-4'>
+			{/* <div className='absolute flex self-end w-full text-center my-auto mt-4'>
 				<Logout />
-			</div>
+			</div> */}
 
-			<table className='w-2/3 m-auto'>
+			<table className='w-2/3 mx-auto  bg-white border-[#EBEFF5]'>
 				<thead>
-					<tr>
-						<th>Timesheet ID</th>
-						<th>Author</th>
-						<th>Month</th>
-						<th>Year</th>
-						<th>Status</th>
-						<th></th>
+					<tr className='border-[#EBEFF5] font-semibold'>
+						<th className='border-[#EBEFF5] font-semibold'>Timesheet ID</th>
+						<th className='border-[#EBEFF5] font-semibold'>Author</th>
+						<th className='border-[#EBEFF5] font-semibold'>Month</th>
+						<th className='border-[#EBEFF5] font-semibold'>Year</th>
+						<th className='border-[#EBEFF5] font-semibold'>Status</th>
+						<th className='border-[#EBEFF5] font-semibold'></th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody className='border-[#EBEFF5]'>
 					{timesheets &&
 						timesheets.map((timesheet) => (
 							<tr className='text-center' key={timesheet.timesheet_id}>
-								<td>{timesheet.timesheet_id}</td>
-								<td>
+								<td className='text-center border-[#EBEFF5]'>
+									{timesheet.timesheet_id}
+								</td>
+								<td className='text-center border-[#EBEFF5]'>
 									{timesheet.author.first_name} {timesheet.author.last_name}
 								</td>
-								<td>{timesheet.month}</td>
-								<td>{timesheet.year}</td>
-								<td>{timesheet.status}</td>
-								<td>
+								<td className='text-center border-[#EBEFF5]'>
+									{timesheet.month}
+								</td>
+								<td className='text-center border-[#EBEFF5]'>
+									{timesheet.year}
+								</td>
+								<td
+									className={`border-[#efe9e9] py-1 ${statusColor(
+										timesheet.status
+									)} `}
+								>
+									{timesheet.status}
+								</td>
+								<td className='py-1.5 border-[#efe9e9] bg-[#2F3C48]'>
 									<Link
 										to={`/manager/review`}
 										onClick={() =>
 											setCurrentTimesheetIdManager(timesheet.timesheet_id)
 										}
-										className='bg-blue-400 block w-full h-full border-2 rounded-none'
+										className='block w-full h-full rounded-none'
 									>
 										View
 									</Link>

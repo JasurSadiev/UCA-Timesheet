@@ -5,20 +5,40 @@ import axios from "../api/axios";
 
 const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 	const ORDERSAPI = "/orders";
+	const GRANTSAPI = "/grants";
+	const [grants, setGrants] = useState([]);
 	const [orders, setOrders] = useState([]);
+	const [selectedGrant, setSelectedGrant] = useState({
+		grantName: "",
+		grantId: "",
+	});
 	const [selectedOrder, setSelectedOrder] = useState({
 		orderName: "",
 		orderId: "",
 	});
 
-	console.log(selectedOrder);
-
-	async function getOrders() {
+	async function getGrants() {
 		try {
-			const response = await axios.get(ORDERSAPI, {
+			const response = await axios.get(GRANTSAPI, {
 				headers: { "Content-Type": "application/json" },
 				withCredentials: true,
 			});
+			setGrants(response.data);
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	async function getOrders(grant_id) {
+		try {
+			const response = await axios.get(
+				ORDERSAPI,
+				{ grant_id: grant_id },
+				{
+					headers: { "Content-Type": "application/json" },
+					withCredentials: true,
+				}
+			);
 			setOrders(response.data);
 		} catch (error) {
 			console.log(error);
@@ -26,40 +46,69 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 	}
 
 	useEffect(() => {
-		// const setInitialSelectedOrder = () => {
-		// 	if (orders.length > 0) {
-		// 		setSelectedOrder({
-		// 			orderName: orders[0].grant_description,
-		// 			orderId: orders[0].id,
-		// 		});
-		// 	}
-		// };
-
+		getGrants();
 		getOrders();
-		// setInitialSelectedOrder();
 	}, [isOpen]);
 
-	const handleDropdownChange = (dropdown, value) => {
+	useEffect(() => {
+		if (selectedGrant.grantId) {
+			getOrders(selectedGrant.grantId);
+		}
+	}, [selectedGrant]);
+
+	// const handleOrderChange = (dropdown, value) => {
+	// 	const currentSelectedOrder = orders.find(
+	// 		(element) => element.order_id === value
+	// 	);
+
+	// 	if (currentSelectedOrder) {
+	// 		setSelectedOrder({
+	// 			orderName: currentSelectedOrder.description,
+	// 			orderId: currentSelectedOrder.order_id,
+	// 		});
+	// 	} else {
+	// 		// Handle the case when no order is selected
+	// 		setSelectedOrder({
+	// 			orderName: "", // Clear the orderName
+	// 			orderId: "", // Clear the orderId
+	// 		});
+	// 	}
+	// };
+
+	const handleOrderChange = (dropdown, value) => {
 		const selectedOrderId = orders.find(
-			(element) => element.grant_description === value
-		)?.id;
+			(element) => element.description === value
+		)?.order_id;
 
-		setSelectedOrder((prevSelectedOrder) => ({
-			...prevSelectedOrder,
+		setSelectedOrder((prevSelectedGrant) => ({
+			...prevSelectedGrant,
 			orderName: value,
-			orderId: selectedOrderId || "", // Handle the case where selectedOrderId is undefined
+			orderId: selectedOrderId || "",
 		}));
+		setOrder((prev) => ({
+			...prev,
+			order_id: selectedOrderId,
+		}));
+	};
 
-		// Log the state after it has been updated
+	const handleGrantChange = (dropdown, value) => {
+		const selectedGrantId = grants.find(
+			(element) => element.description === value
+		)?.grant_id;
+
+		setSelectedGrant((prevSelectedGrant) => ({
+			...prevSelectedGrant,
+			grantName: value,
+			grantId: selectedGrantId || "",
+		}));
 	};
 
 	const handleSubmit = () => {
-		setOrder(selectedOrder);
-
-		// Perform any other actions with selectedOrder if needed
-		// console.log("Selected Options:", selectedOrder);
-
-		// Close the modal
+		setOrder({
+			description: selectedGrant.grantName,
+			order_id: selectedOrder.orderId,
+			grant_id: selectedGrant.grantId,
+		});
 		onClose();
 		newRecord();
 	};
@@ -80,9 +129,47 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 			<div className='modal-overlay' onClick={onClose}></div>
 			<div className='modal-container'>
 				<div className='modal-content'>
-					<h2 className='text-2xl font-bold mb-4'>Select Options</h2>
+					<div className='flex justify-between'>
+						<h2 className='text-2xl font-bold mb-4'>Select Options</h2>
+						<span
+							onClick={() => onClose(false)}
+							className='font-bold cursor-pointer bg-white px-3 text-red-500 mt-2 text- text-2xl'
+						>
+							X
+						</span>
+					</div>
 
 					{/* Dropdowns */}
+					<div className='grid grid-cols-2 gap-4'>
+						{[1].map((dropdownNumber) => (
+							<div key={dropdownNumber}>
+								<label htmlFor={`dropdown${dropdownNumber}`}>Grants</label>
+								<select
+									id={`dropdown${dropdownNumber}`}
+									value={selectedGrant["grantName"]}
+									onChange={(e) =>
+										handleGrantChange(
+											`dropdown${dropdownNumber}`,
+											e.target.value
+										)
+									}
+									className='w-full p-2 border border-gray-300 rounded'
+								>
+									<option value=''></option>
+									{/* Add your dropdown options here */}
+									{grants.map((element) => (
+										<option
+											key={element.grant_id}
+											value={`${element.description}`}
+										>
+											{element.description}
+										</option>
+									))}
+								</select>
+							</div>
+						))}
+					</div>
+
 					<div className='grid grid-cols-2 gap-4'>
 						{[1].map((dropdownNumber) => (
 							<div key={dropdownNumber}>
@@ -91,7 +178,7 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 									id={`dropdown${dropdownNumber}`}
 									value={selectedOrder["orderName"]}
 									onChange={(e) =>
-										handleDropdownChange(
+										handleOrderChange(
 											`dropdown${dropdownNumber}`,
 											e.target.value
 										)
@@ -102,10 +189,10 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 									{/* Add your dropdown options here */}
 									{orders.map((element) => (
 										<option
-											key={element.id}
-											value={`${element.grant_description}`}
+											key={element.order_id}
+											value={`${element.description}`}
 										>
-											{element.grant_description}
+											{element.order_id} - {element.description}
 										</option>
 									))}
 								</select>

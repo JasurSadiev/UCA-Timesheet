@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import axios from "../api/axios";
 import { v4 as uuidv4 } from "uuid";
+import { getWeekOfDay } from "./HolidaysAndWeekends";
 
 const MyTable = ({
 	tableData,
@@ -35,11 +36,33 @@ const MyTable = ({
 	const UPDATE_DAILY_HOURS_API = "/daily-hours";
 	const SUBMITTIMESHEET = `/timesheets/submit/${currentTimesheetId}`;
 
+	console.log(tableData);
+
 	function modalState() {
 		setisOpen(!isOpen);
 	}
 
 	function submitTimesheet() {
+		axios
+			.put(
+				`/timesheets/${currentTimesheetId}`,
+				{ comment: comments },
+				{
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+					},
+					withCredentials: true,
+				}
+			)
+			.then((response) => {
+				console.log(response);
+				// fetchUpdatedTimesheets();
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
 		axios
 			.post(
 				SUBMITTIMESHEET,
@@ -135,32 +158,48 @@ const MyTable = ({
 		calculateTotals();
 	}, [tableData, tableTotalHours, totalHours]);
 
-	// const NewRecord = async (e) => {
-	// 	const timesheetId = tableData[0].timesheet_id;
-	// 	const orderId = order.orderId;
-	// 	const randomNumber = Math.floor(Math.random() * 100000) + 1;
-	// 	const randomNumber2 = Math.floor(Math.random() * 100000) + 1;
-	// 	console.log(timesheetId, orderId, randomNumber);
-	// 	try {
-	// 		const response = await axios.post(
-	// 			NEW_RECORD_API,
-	// 			JSON.stringify({
-	// 				timesheet_id: timesheetId,
-	// 				external_id: randomNumber,
-	// 				order_id: orderId,
-	// 			}),
-	// 			{
-	// 				headers: { "Content-Type": "application/json" },
-	// 				withCredentials: true,
-	// 			}
-	// 		);
-	// 		console.log(JSON.stringify(response?.data));
-	// 		getTimeSheet(true);
-	// 		// window.location.reload();
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 	}
+	// const cityToCountryMapping = {
+	// 	Dushanbe: "Tajikistan",
+	// 	Khujand: "Tajikistan",
+	// 	Khorog: "Tajikistan",
+	// 	Bishkek: "Kyrgyzstan",
+	// 	// Add more city-country mappings as needed
 	// };
+
+	// function getCountryForCity(city) {
+	// 	return cityToCountryMapping[city] || "Unknown";
+	// }
+
+	// function getWeekOfDay(index, year, month) {
+	// 	if (index > 0) {
+	// 		const date = new Date(year, month - 1, index);
+	// 		const dayOfWeek = date.getDay();
+	// 		const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+	// 		const country = getCountryForCity(tableData.author.city);
+	// 		let isHoliday = false;
+	// 		if (country === "Tajikistan") {
+	// 			isHoliday = HolidaysInTajikistan.includes(
+	// 				`${date.toLocaleString("default", {
+	// 					month: "long",
+	// 				})} ${index}, ${year}`
+	// 			);
+	// 		} else if (country === "Kyrgyzstan") {
+	// 			isHoliday = HolidaysInKyrgyzstan.includes(
+	// 				`${date.toLocaleString("default", {
+	// 					month: "long",
+	// 				})} ${index}, ${year}`
+	// 			);
+	// 		}
+
+	// 		if (isHoliday || isWeekend) {
+	// 			return "text-[14px] bg-red-500 text-white";
+	// 		} else {
+	// 			return "text-[14px] bg-white";
+	// 		}
+	// 	} else {
+	// 		return "text-[14px] bg-white";
+	// 	}
+	// }
 
 	const generateFirstRowHeaders = () => {
 		const headers = [
@@ -172,7 +211,12 @@ const MyTable = ({
 		return headers.map((header, index) => (
 			<th
 				key={index}
-				className={`text-[14px]`}
+				className={getWeekOfDay(
+					index - 1,
+					tableData.year,
+					tableData.month,
+					tableData.author.city
+				)}
 				colSpan={`${index === 0 ? "7" : "1"}`}
 			>
 				{header}
@@ -243,6 +287,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
+						disabled={tableData.status === "approved"}
 						value={tableData.records[rowIndex].grant_id ?? ""}
 						onChange={(e) =>
 							handleInputChange(
@@ -257,6 +302,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
+						disabled={tableData.status === "approved"}
 						value={tableData.records[rowIndex].order_id || ""}
 						onChange={(e) =>
 							handleInputChange(rowIndex, "Internal Order", e.target.value)
@@ -267,6 +313,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
+						disabled={tableData.status === "approved"}
 						value={tableData.records[rowIndex].grand_description || ""}
 						onChange={(e) =>
 							handleInputChange(rowIndex, "Name", e.target.value)
@@ -277,6 +324,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
+						disabled={tableData.status === "approved"}
 						value={tableData.records[rowIndex].balance || ""}
 						onChange={(e) =>
 							handleInputChange(rowIndex, "Budget", e.target.value)
@@ -287,6 +335,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
+						disabled={tableData.status === "approved"}
 						// value={tableData[0].records[rowIndex].start_date || ""}
 						value={
 							new Date(
@@ -306,6 +355,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
+						disabled={tableData.status === "approved"}
 						value={
 							new Date(tableData.records[rowIndex].end_date).toLocaleDateString(
 								"en-US",
@@ -324,6 +374,7 @@ const MyTable = ({
 				</td>
 				<td className='max-w-[100px] w-[50px]'>
 					<input
+						disabled={tableData.status === "approved"}
 						type='text'
 						value={tableData[rowIndex]?.["%"] || ""}
 						onChange={(e) => handleInputChange(rowIndex, "%", e.target.value)}
@@ -332,6 +383,7 @@ const MyTable = ({
 				</td>
 				<td className='max-w-[50px] w-[25px]'>
 					<input
+						disabled={tableData.status === "approved"}
 						type='text'
 						value={totalHours[rowIndex]}
 						onChange={(e) =>
@@ -344,11 +396,12 @@ const MyTable = ({
 				{Array.from({ length: numColumns }, (_, colIndex) => (
 					<td key={colIndex} className=''>
 						<input
+							disabled={tableData.status === "approved"}
 							type='text'
 							value={
 								tableData.records[rowIndex].daily_hours[colIndex].hours
 									? tableData.records[rowIndex].daily_hours[colIndex].hours
-									: 0
+									: ""
 							}
 							onChange={(e) =>
 								handleInputChange(rowIndex, colIndex + 1, e.target.value)
@@ -391,6 +444,7 @@ const MyTable = ({
 						<td colSpan='39'>
 							<textarea
 								value={comments}
+								disabled={tableData.status === "approved"}
 								onChange={handleCommentsChange}
 								className='w-full h-16 p-2 focus:outline-none'
 								placeholder='Add your comments here...'
@@ -399,20 +453,22 @@ const MyTable = ({
 					</tr>
 				</tfoot>
 			</table>
-			<button
-				// onClick={NewRecord}
-				onClick={setisOpen}
-				className='px-4 py-1 bg-blue-500 text-white self mr-10 mt-4'
-			>
-				Add Row
-			</button>
-			<button
-				onClick={submitTimesheet}
-				// onClick={test1}
-				className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'
-			>
-				Submit
-			</button>
+			{tableData.status !== "approved" && ( // Rendering condition
+				<>
+					<button
+						onClick={setisOpen} // Click handler for Add Row button
+						className='px-4 py-1 bg-blue-500 text-white self mr-10 mt-4'
+					>
+						Add Row
+					</button>
+					<button
+						onClick={submitTimesheet} // Click handler for Submit button
+						className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'
+					>
+						Submit
+					</button>
+				</>
+			)}
 		</div>
 	);
 };

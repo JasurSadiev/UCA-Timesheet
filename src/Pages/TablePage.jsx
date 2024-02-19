@@ -7,6 +7,7 @@ import MainTable from "../Components/MainTable";
 import Navbar from "../Components/Navbar";
 import AddRowModal from "../Components/AddRowModal";
 import useAuth from "../hooks/useAuth";
+import Status from "../Components/Status";
 
 const TablePage = ({ currentTimesheetId }) => {
 	const [tableData, setTableData] = useState("");
@@ -14,7 +15,7 @@ const TablePage = ({ currentTimesheetId }) => {
 	const [timeSheet, setTimeSheet] = useState(false);
 	const [updateTimeSheet, setUpdateTimeSheet] = useState(false);
 	const [isOpen, setisOpen] = useState(false);
-	const [order, setOrder] = useState("");
+	const [order, setOrder] = useState({});
 	const NEW_RECORD_API = "/records";
 
 	const { auth, setAuth } = useAuth();
@@ -22,6 +23,8 @@ const TablePage = ({ currentTimesheetId }) => {
 
 	const apiUrl = `/timesheets/${currentTimesheetId}`;
 	let accessToken = auth.accessToken;
+
+	console.log(tableData.author);
 
 	function getTimesheet() {
 		axios
@@ -51,18 +54,18 @@ const TablePage = ({ currentTimesheetId }) => {
 		getTimesheet();
 	}, []);
 
+	console.log(order.order_id);
 	const NewRecord = async () => {
 		const timesheetId = tableData.timesheet_id;
-		const orderId = order.orderId;
-		const randomNumber = Math.floor(Math.random() * 100000) + 1;
-		const randomNumber2 = Math.floor(Math.random() * 100000) + 1;
+		const randomNumber = (Math.floor(Math.random() * 100000) + 1).toString();
+
 		try {
 			const response = await axios.post(
 				NEW_RECORD_API,
 				JSON.stringify({
 					timesheet_id: timesheetId,
 					external_id: randomNumber,
-					order_id: orderId,
+					order_id: order.order_id,
 				}),
 				{
 					headers: { "Content-Type": "application/json" },
@@ -86,53 +89,56 @@ const TablePage = ({ currentTimesheetId }) => {
 	// console.log(tableData[0].author.city);
 
 	return (
-		<div className='flex flex-col px-4 max-w-screen'>
+		<div className='flex flex-col max-w-screen'>
 			<Navbar />
-			<h1 className='text-center mb-20 text-3xl font-bold mt-[100px]'>
+			<Status status={tableData.status} />
+			<h1 className='text-center mb-10 text-3xl font-bold mt-[20px]'>
 				University of Central Asia
 			</h1>
-			<div className='flex justify-between'>
-				<InputText labelText={"DUTY STATION"} value={tableData.author.city} />
-				<div className='flex flex-col text-center mb-8'>
-					<h3 className='text-xl font-semibold'>MONTHLY TIME SHEET</h3>
-					<p className='text-lg font-medium'>FOR PERIOD ENDING</p>
+			<div className='mx-4'>
+				<div className='flex justify-between'>
+					<InputText labelText={"DUTY STATION"} value={tableData.author.city} />
+					<div className='flex flex-col text-center mb-8'>
+						<h3 className='text-xl font-semibold'>MONTHLY TIME SHEET</h3>
+						<p className='text-lg font-medium'>FOR PERIOD ENDING</p>
+					</div>
+					<InputText labelText={"POSITION"} value={tableData.author.position} />
 				</div>
-				<InputText labelText={"POSITION"} value={tableData.author.position} />
-			</div>
-			<div className='flex justify-between'>
-				<InputText
-					labelText={"EMPLOYEE NAME (PLEASE PRINT)"}
-					value={`${tableData.author.first_name} ${tableData.author.last_name}`}
-				/>
-				<div className='flex gap-x-4'>
-					<InputDate labelText={"month"} value={tableData.month} />
-					<InputDate labelText={"year"} value={tableData.year} />
+				<div className='flex justify-between'>
+					<InputText
+						labelText={"EMPLOYEE NAME (PLEASE PRINT)"}
+						value={`${tableData.author.first_name} ${tableData.author.last_name} ID: ${tableData.author.user_id}`}
+					/>
+					<div className='flex gap-x-4'>
+						<InputDate labelText={"month"} value={tableData.month} />
+						<InputDate labelText={"year"} value={tableData.year} />
+					</div>
+					<InputText
+						labelText={"DEPARTMENT"}
+						value={tableData.author.department}
+					/>
 				</div>
-				<InputText
-					labelText={"DEPARTMENT"}
-					value={tableData.author.department}
+				<AddRowModal
+					isOpen={isOpen}
+					onClose={setisOpen}
+					order={order}
+					setOrder={setOrder}
+					newRecord={NewRecord}
+				/>
+				<MainTable
+					tableData={tableData}
+					setTableData={setTableData}
+					getTimeSheet={setTimeSheet}
+					timeSheet={timeSheet}
+					isOpen={isOpen}
+					setisOpen={setisOpen}
+					order={order}
+					setOrder={setOrder}
+					currentTimesheetId={currentTimesheetId}
+					accessToken={accessToken}
+					days={days}
 				/>
 			</div>
-			<AddRowModal
-				isOpen={isOpen}
-				onClose={setisOpen}
-				order={order}
-				setOrder={setOrder}
-				newRecord={NewRecord}
-			/>
-			<MainTable
-				tableData={tableData}
-				setTableData={setTableData}
-				getTimeSheet={setTimeSheet}
-				timeSheet={timeSheet}
-				isOpen={isOpen}
-				setisOpen={setisOpen}
-				order={order}
-				setOrder={setOrder}
-				currentTimesheetId={currentTimesheetId}
-				accessToken={accessToken}
-				days={days}
-			/>
 		</div>
 	);
 };

@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 import useAuth from "../hooks/useAuth";
 
-import TimesheetLogo from "../assets/timesheetLogo.png";
-import { Logout } from "../Components/Navbar";
+import TimesheetLogo from "../assets/timesheet_logo.svg";
+import InboxLogo from "../assets/inbox_logo.svg";
+import Navbar, { Logout } from "../Components/Navbar";
 
 const Main = () => {
 	const [userInfo, setUserInfo] = useState(null);
@@ -20,26 +21,29 @@ const Main = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			if (userInfo && userInfo.id === userInfo.manager_id && !loading) {
-				try {
-					const response = await axios.get("/user/manager/timesheets/filter", {
-						params: { status: "pending" },
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-							"Content-Type": "application/json",
-							withCredentials: true,
-						},
-					});
+			try {
+				const response = await axios.get("/user/manager/timesheets/filter", {
+					params: { status: "pending" },
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+						withCredentials: true,
+					},
+				});
 
-					console.log(response.data);
-				} catch (error) {
-					console.error("Error fetching data:", error);
-				}
+				console.log(response.data);
+				// Update the state with the number of pending timesheets
+				setPendings(response.data.length);
+			} catch (error) {
+				console.error("Error fetching data:", error);
 			}
 		};
 
-		fetchData();
-	}, [userInfo, accessToken, loading]);
+		// Only fetch data if the user is a manager
+		if (userInfo) {
+			fetchData();
+		}
+	}, []);
 
 	useEffect(() => {
 		try {
@@ -70,29 +74,35 @@ const Main = () => {
 			{loading ? (
 				<p>Loading...</p>
 			) : userInfo ? (
-				<div className='flex bg-[#adc7e1] h-screen flex-col'>
+				<div className='flex bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700] h-screen  w-screen overflow-hidden flex-col'>
+					<Navbar />
 					<div className='flex'>
-						<p className='font-bold mt-4 ml-10 text-2xl'>
-							Welcome back, <span>{userInfo.first_name}</span>!
+						<p className='font-semibold mt-8 ml-10 text-2xl'>
+							Welcome back,{" "}
+							<span>
+								{userInfo.first_name} {userInfo.last_name}
+							</span>
+							!
 						</p>
-						<Logout />
+						{/* <Logout /> */}
 					</div>
-					<div className='mt-[30%] ml-10 flex gap-x-10 text-center'>
+					<div className='mt-[20%] ml-10 flex gap-x-10 text-center'>
 						<Link
 							to={"/my-timesheets"}
-							className='w-[200px] h-[200px] text-xl bg-white shadow-2xl'
+							className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
 						>
-							<p className='text-black '>My Timesheets</p>
-							<img src={TimesheetLogo} alt='' className='w-1/2 m-auto mt-6' />
+							<p className='text-black mt-4'>My Timesheets</p>
+							<img src={TimesheetLogo} alt='' className='w-1/2 m-auto mt-4' />
 						</Link>
 						<Link
 							to={"/pending-timesheets"}
-							className='w-[200px] h-[200px] bg-white shadow-2xl'
+							className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
 						>
-							<p className='text-black mb-10 text-xl'>Inbox</p>
-							<span className='text-red-400 font-semibold text-[40px]'>
+							<p className='text-black mt-4'>Inbox</p>
+							<span className='text-white font-medium text-[12px] bg-[#FA7E7E] rounded-full px-[10px] py-[6px] ml-[40%]'>
 								{pendings}
 							</span>
+							<img src={InboxLogo} alt='' className=' m-auto' />
 						</Link>
 					</div>
 				</div>
