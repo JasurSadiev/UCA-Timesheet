@@ -11,6 +11,8 @@ import Manager from "./Pages/Manager";
 import Main from "./Pages/Main";
 import ListOfTimesheets from "./Pages/ListOfTimesheets";
 import ListOfTimesheetsManager from "./Pages/ListOfTimeSheetsManager";
+import UserSettings from "./Pages/UserSettings";
+import ListOfHolidays from "./Pages/HolidaysList";
 
 const ROLES = {
 	User: 2001,
@@ -47,6 +49,9 @@ function App() {
 					path={`timesheet/`}
 					element={<TablePage currentTimesheetId={currentTimesheetId} />}
 				/>
+
+				<Route path={`settings/`} element={<UserSettings />} />
+				<Route path={`holidays/`} element={<ListOfHolidays />} />
 
 				<Route
 					path='pending-timesheets'

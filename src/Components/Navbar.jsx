@@ -102,9 +102,13 @@ const UserMenuDiv = () => {
 					Profile
 				</span>
 			</div>
-			<div className='flex gap-x-2  text-[#9DACC3]'>
-				<img src={SettingLogo} alt='' />
-				<span className='text-[12px] hover:underline'>Settings</span>
+			<div className='flex gap-x-2 -mt-2 my-auto  text-[#9DACC3]'>
+				<img src={SettingLogo} alt='' className='my-auto' />
+				<Link to={"/settings"} className='-mt-1'>
+					<span className='text-[12px] my-auto text-[#9DACC3] hover:underline'>
+						Settings
+					</span>
+				</Link>
 			</div>
 			<hr />
 			<div className='flex gap-x-2 text-[#9DACC3]'>

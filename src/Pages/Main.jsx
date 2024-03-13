@@ -5,6 +5,7 @@ import useAuth from "../hooks/useAuth";
 
 import TimesheetLogo from "../assets/timesheet_logo.svg";
 import InboxLogo from "../assets/inbox_logo.svg";
+import ReportLogo from "../assets/reportLogo.svg";
 import Navbar, { Logout } from "../Components/Navbar";
 
 const Main = () => {
@@ -19,6 +20,7 @@ const Main = () => {
 
 	const USERINFO = "/user/me";
 
+	// console.log(userInfo);
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -57,6 +59,7 @@ const Main = () => {
 				})
 				.then((response) => {
 					setUserInfo(response.data);
+					setAuth((prevData) => ({ ...prevData, userInfo: response.data }));
 					setLoading(false);
 				})
 				.catch((error) => {
@@ -103,6 +106,23 @@ const Main = () => {
 								{pendings}
 							</span>
 							<img src={InboxLogo} alt='' className=' m-auto' />
+						</Link>
+						{!userInfo.is_admin && (
+							<Link
+								to={"/pending-timesheets"}
+								className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
+							>
+								<p className='text-black mt-4'>Report</p>
+
+								<img src={ReportLogo} alt='' className=' mx-auto mt-[1.5em]' />
+							</Link>
+						)}
+						<Link
+							to={"/holidays"}
+							className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
+						>
+							<p className='text-black mt-4'>Holidays</p>
+							<img src={TimesheetLogo} alt='' className='w-1/2 m-auto mt-4' />
 						</Link>
 					</div>
 				</div>

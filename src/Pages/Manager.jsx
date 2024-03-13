@@ -12,8 +12,10 @@ const Manager = ({ currentTimesheetIdManager }) => {
 	const navigate = useNavigate();
 	const accessToken = auth.accessToken;
 	const MANAGERTIMESHEETS = "/user/manager/timesheets";
+
+	console.log(timesheets);
+
 	useEffect(() => {
-		console.log(accessToken);
 		try {
 			axios
 				.get(MANAGERTIMESHEETS, {
@@ -29,20 +31,26 @@ const Manager = ({ currentTimesheetIdManager }) => {
 		} catch (error) {
 			console.log(error);
 		}
-	}, []);
+	}, [accessToken]);
 
 	return (
-		<div className='w-screen min-h-screen overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
-			<Navbar />
-			{/* <WelcomeBack /> */}
-			<Review currentTimesheetIdManager={currentTimesheetIdManager} />
-			{timesheets.status !== "approved" && (
-				<Buttons
-					currentTimesheetIdManager={currentTimesheetIdManager}
-					accessToken={accessToken}
-				/>
+		<>
+			{timesheets ? (
+				<div className='w-screen min-h-screen overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
+					<Navbar />
+					{/* <WelcomeBack /> */}
+					<Review currentTimesheetIdManager={currentTimesheetIdManager} />
+					{timesheets.status !== "approved" && (
+						<Buttons
+							currentTimesheetIdManager={currentTimesheetIdManager}
+							accessToken={accessToken}
+						/>
+					)}
+				</div>
+			) : (
+				<p>Loading</p>
 			)}
-		</div>
+		</>
 	);
 };
 
