@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
 import { v4 as uuidv4 } from "uuid";
 import { getWeekOfDay } from "./HolidaysAndWeekends";
+import Loading from "./Loading.jsx";
 
 const MyTable = ({
 	tableData,
@@ -28,6 +29,7 @@ const MyTable = ({
 		Array(tableData.records ? tableData.records.length : 0).fill(0)
 	);
 	const [tableTotalHours, setTableTotalHours] = useState(0);
+	const [loading, setLoading] = useState(false);
 
 	const [tableTotal, setTableTotal] = useState(Array(days + 2).fill(0));
 	const randomId = uuidv4();
@@ -36,13 +38,12 @@ const MyTable = ({
 	const UPDATE_DAILY_HOURS_API = "/daily-hours";
 	const SUBMITTIMESHEET = `/timesheets/submit/${currentTimesheetId}`;
 
-	console.log(tableData);
-
 	function modalState() {
 		setisOpen(!isOpen);
 	}
 
 	function submitTimesheet() {
+		setLoading(true);
 		axios
 			.put(
 				`/timesheets/${currentTimesheetId}`,
@@ -60,7 +61,13 @@ const MyTable = ({
 				// fetchUpdatedTimesheets();
 			})
 			.catch((error) => {
+				if (error.response && error.response.status === 401) {
+					navigate("/");
+				}
 				console.error(error);
+			})
+			.finally(() => {
+				setLoading(false);
 			});
 
 		axios
@@ -78,6 +85,12 @@ const MyTable = ({
 			.then((response) => {
 				console.log(response);
 				navigate("/my-timesheets");
+			})
+			.catch((error) => {
+				console.log(error);
+				if (error.response && error.response.status === 401) {
+					navigate("/");
+				}
 			});
 	}
 
@@ -158,49 +171,6 @@ const MyTable = ({
 		calculateTotals();
 	}, [tableData, tableTotalHours, totalHours]);
 
-	// const cityToCountryMapping = {
-	// 	Dushanbe: "Tajikistan",
-	// 	Khujand: "Tajikistan",
-	// 	Khorog: "Tajikistan",
-	// 	Bishkek: "Kyrgyzstan",
-	// 	// Add more city-country mappings as needed
-	// };
-
-	// function getCountryForCity(city) {
-	// 	return cityToCountryMapping[city] || "Unknown";
-	// }
-
-	// function getWeekOfDay(index, year, month) {
-	// 	if (index > 0) {
-	// 		const date = new Date(year, month - 1, index);
-	// 		const dayOfWeek = date.getDay();
-	// 		const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-	// 		const country = getCountryForCity(tableData.author.city);
-	// 		let isHoliday = false;
-	// 		if (country === "Tajikistan") {
-	// 			isHoliday = HolidaysInTajikistan.includes(
-	// 				`${date.toLocaleString("default", {
-	// 					month: "long",
-	// 				})} ${index}, ${year}`
-	// 			);
-	// 		} else if (country === "Kyrgyzstan") {
-	// 			isHoliday = HolidaysInKyrgyzstan.includes(
-	// 				`${date.toLocaleString("default", {
-	// 					month: "long",
-	// 				})} ${index}, ${year}`
-	// 			);
-	// 		}
-
-	// 		if (isHoliday || isWeekend) {
-	// 			return "text-[14px] bg-red-500 text-white";
-	// 		} else {
-	// 			return "text-[14px] bg-white";
-	// 		}
-	// 	} else {
-	// 		return "text-[14px] bg-white";
-	// 	}
-	// }
-
 	const generateFirstRowHeaders = () => {
 		const headers = [
 			"Charging Code/Project",
@@ -235,6 +205,10 @@ const MyTable = ({
 			"End Date",
 			"%",
 		];
+
+		if (loading) {
+			return <Loading />;
+		}
 
 		return [
 			...headers.map((header, index) => (
@@ -457,13 +431,13 @@ const MyTable = ({
 				<>
 					<button
 						onClick={setisOpen} // Click handler for Add Row button
-						className='px-4 py-1 bg-blue-500 text-white self mr-10 mt-4'
+						className='px-4 py-1 bg-blue-500 text-white self mr-10 mt-4 shadow-xl'
 					>
 						Add Row
 					</button>
 					<button
 						onClick={submitTimesheet} // Click handler for Submit button
-						className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4'
+						className='px-4 py-1 bg-green-500 text-white self mr-10 mt-4 shadow-xl'
 					>
 						Submit
 					</button>

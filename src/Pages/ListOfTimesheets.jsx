@@ -14,21 +14,26 @@ const ListOfTimesheets = ({ setCurrentTimesheetId }) => {
 	const MYTIMESHEETS = "/user/timesheets";
 
 	function fetchUpdatedTimesheets() {
-		axios
-			.get(MYTIMESHEETS, {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					"Content-Type": "application/json",
-					withCredentials: true,
-				},
-			})
-			.then((response) => {
-				console.log(response.data);
-				setTimesheets(response.data);
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		if (auth.accessToken) {
+			axios
+				.get(MYTIMESHEETS, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+						withCredentials: true,
+					},
+				})
+				.then((response) => {
+					console.log(response.data);
+					setTimesheets(response.data);
+				})
+				.catch((error) => {
+					console.error(error);
+					if (error.response.status === 401) {
+						navigate("/");
+					}
+				});
+		}
 	}
 
 	useEffect(() => {
@@ -69,8 +74,27 @@ const ListOfTimesheets = ({ setCurrentTimesheetId }) => {
 		}
 	}
 
+	function getMonthName(monthId) {
+		const months = [
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December",
+		];
+
+		return months[monthId - 1];
+	}
+
 	return (
-		<div className='w-screen min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
+		<div className='max-w-screen min-h-screen max-h-fit pb-4 flex flex-col overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
 			<Navbar />
 			<h1 className='text-center mt-4 text-2xl font-bold mb-[100px]'>
 				My Timesheets
@@ -117,7 +141,9 @@ const ListOfTimesheets = ({ setCurrentTimesheetId }) => {
 								<td className='border-[#EBEFF5] py-1'>
 									{timesheet.timesheet_id}
 								</td>
-								<td className='border-[#EBEFF5] py-1'>{timesheet.month}</td>
+								<td className='border-[#EBEFF5] py-1'>
+									{getMonthName(timesheet.month)}
+								</td>
 								<td className='border-[#EBEFF5] py-1'>{timesheet.year}</td>
 								<td
 									className={`border-[#efe9e9] py-1 ${statusColor(
@@ -186,20 +212,32 @@ const CreateTimesheetModal = ({
 
 	return (
 		<div className='absolute w-screen h-screen bg-gray-800/80'>
-			<form className='flex w-[700px] mt-[20%] flex-col rounded-md items-center bg-white m-auto'>
+			<form className='flex w-[700px] flex-col rounded-md items-center bg-white mx-auto mt-[10%]'>
 				<h2 className='text-center text-black font-semibold text-xl'>
 					Choose Month and Year to Create a New Timesheet
 				</h2>
 				<div className='flex flex-col'>
 					<label htmlFor='month'>Month</label>
-					<input
-						type='number'
+					<select
 						value={month}
 						onChange={(e) => setMonth(e.target.value)}
 						name='month'
 						id='month'
 						className='w-[400px] border-black border-2 text-black rounded-sm pl-2'
-					/>
+					>
+						<option value='1'>January</option>
+						<option value='2'>February</option>
+						<option value='3'>March</option>
+						<option value='4'>April</option>
+						<option value='5'>May</option>
+						<option value='6'>June</option>
+						<option value='7'>July</option>
+						<option value='8'>August</option>
+						<option value='9'>September</option>
+						<option value='10'>October</option>
+						<option value='11'>November</option>
+						<option value='12'>December</option>
+					</select>
 				</div>
 				<div className='flex flex-col'>
 					<label htmlFor='year' className='self-start'>

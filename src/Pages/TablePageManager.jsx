@@ -5,6 +5,8 @@ import InputDate from "../Components/TableComponents/InputDate";
 import InputText from "../Components/TableComponents/InputText";
 import MainTableManager from "../Components/ManagerComponents/MainTableManager";
 import Navbar from "../Components/Navbar";
+import Buttons from "../Components/ManagerComponents/Buttons";
+import Status from "../Components/Status";
 import AddRowModal from "../Components/AddRowModal";
 import useAuth from "../hooks/useAuth";
 
@@ -19,9 +21,9 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 	const { auth, setAuth } = useAuth();
 	const navigate = useNavigate();
 
+	let accessToken = auth.accessToken;
 	useEffect(() => {
 		const apiUrl = `/timesheets/${currentTimesheetIdManager}`;
-		let accessToken = auth.accessToken;
 
 		// const header = `Authorization: Bearer ${accessToken}`;
 		// Send a GET request using axios when the component mounts
@@ -43,6 +45,9 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 				// Handle the response as needed
 			})
 			.catch((error) => {
+				if (error.response && error.response.status === 401) {
+					navigate("/");
+				}
 				console.error("Error:", error);
 				// Handle errors
 			});
@@ -69,6 +74,9 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 			// getTimeSheet(true);
 			// window.location.reload();
 		} catch (error) {
+			if (error.response && error.response.status === 401) {
+				navigate("/");
+			}
 			console.log(error);
 		}
 	};
@@ -87,8 +95,9 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 	// console.log(tableData[0].author.city);
 
 	return (
-		<div className='flex flex-col px-4 max-w-full bg-white'>
-			<div className='flex justify-between'>
+		<div className='flex flex-col px-4 max-w-screen overflow-x-hidden ml-0 mr-0 bg-white'>
+			<Status status={tableData.status} />
+			<div className='flex justify-between mt-8'>
 				<InputText labelText={"DUTY STATION"} value={tableData.author.city} />
 				<div className='flex flex-col text-center mb-8'>
 					<h3 className='text-xl font-semibold'>MONTHLY TIME SHEET</h3>
@@ -130,6 +139,12 @@ const TablePageManager = ({ currentTimesheetIdManager }) => {
 				currentTimesheetIdManager={currentTimesheetIdManager}
 				accessToken={auth.accessToken}
 			/>
+			{tableData.status !== "approved" && (
+				<Buttons
+					currentTimesheetIdManager={currentTimesheetIdManager}
+					accessToken={accessToken}
+				/>
+			)}
 		</div>
 	);
 };

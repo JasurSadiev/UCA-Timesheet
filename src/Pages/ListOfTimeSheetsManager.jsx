@@ -26,7 +26,7 @@ const ListOfTimesheetsManager = ({ setCurrentTimesheetIdManager }) => {
 				setTimesheets(response.data);
 			})
 			.catch((error) => {
-				console.error(error);
+				console.log(error);
 			});
 	}
 
@@ -44,6 +44,25 @@ const ListOfTimesheetsManager = ({ setCurrentTimesheetIdManager }) => {
 		} else {
 			return "bg-[#FEF3C7] text-[#E07706]";
 		}
+	}
+
+	function getMonthName(monthId) {
+		const months = [
+			"January",
+			"February",
+			"March",
+			"April",
+			"May",
+			"June",
+			"July",
+			"August",
+			"September",
+			"October",
+			"November",
+			"December",
+		];
+
+		return months[monthId - 1];
 	}
 
 	return (
@@ -78,7 +97,7 @@ const ListOfTimesheetsManager = ({ setCurrentTimesheetIdManager }) => {
 									{timesheet.author.first_name} {timesheet.author.last_name}
 								</td>
 								<td className='text-center border-[#EBEFF5]'>
-									{timesheet.month}
+									{getMonthName(timesheet.month)}
 								</td>
 								<td className='text-center border-[#EBEFF5]'>
 									{timesheet.year}

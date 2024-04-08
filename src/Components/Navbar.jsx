@@ -78,7 +78,7 @@ export const Logout = () => {
 
 const UserMenuDiv = () => {
 	const navigate = useNavigate();
-	const { setAuth } = useAuth();
+	const { auth, setAuth } = useAuth();
 
 	function logOut() {
 		Cookies.remove("accessToken");
@@ -87,12 +87,15 @@ const UserMenuDiv = () => {
 	}
 
 	return (
-		<div className='h-fit w-fit px-2 bg-white text-black flex flex-col absolute right-2 rounded-[8px] shadow-xl cursor-pointer'>
+		<div className='h-fit max-w-screen px-2 bg-white text-black flex flex-col absolute right-2 rounded-[8px] shadow-xl cursor-pointer'>
 			<div className='flex gap-x-2'>
 				<img src={ProfileLogoMedium} alt='' />
 				<div className='flex flex-col text-left'>
-					<h3 className='text-[12px] -mb-[20px]'>Jasurbek Sadiev</h3>
-					<p className='text-[8px] text-[#9DACC3]'>jasurbek.sadiev@gmail.com</p>
+					<h3 className='text-[12px] -mb-[20px]'>
+						{auth.userInfo.first_name}
+						{auth.userInfo.last_name}
+					</h3>
+					<p className='text-[8px] text-[#9DACC3]'>{auth.userInfo.email}</p>
 				</div>
 			</div>
 			<hr />

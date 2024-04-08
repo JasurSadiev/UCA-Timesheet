@@ -13,6 +13,7 @@ import ListOfTimesheets from "./Pages/ListOfTimesheets";
 import ListOfTimesheetsManager from "./Pages/ListOfTimeSheetsManager";
 import UserSettings from "./Pages/UserSettings";
 import ListOfHolidays from "./Pages/HolidaysList";
+import SignUp from "./Pages/SignUp";
 
 const ROLES = {
 	User: 2001,
@@ -67,6 +68,8 @@ function App() {
 						<Manager currentTimesheetIdManager={currentTimesheetIdManager} />
 					}
 				/>
+
+				<Route path='admin/sign-up' element={<SignUp />} />
 				<Route path='unauthorized' element={<Unauthorized />} />
 				<Route
 					path='/'

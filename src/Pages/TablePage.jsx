@@ -15,6 +15,7 @@ const TablePage = ({ currentTimesheetId }) => {
 	const [timeSheet, setTimeSheet] = useState(false);
 	const [updateTimeSheet, setUpdateTimeSheet] = useState(false);
 	const [isOpen, setisOpen] = useState(false);
+	const [loading, setLoading] = useState(false);
 	const [order, setOrder] = useState({});
 	const NEW_RECORD_API = "/records";
 
@@ -24,7 +25,7 @@ const TablePage = ({ currentTimesheetId }) => {
 	const apiUrl = `/timesheets/${currentTimesheetId}`;
 	let accessToken = auth.accessToken;
 
-	console.log(tableData.author);
+	console.log(tableData);
 
 	function getTimesheet() {
 		axios
@@ -46,7 +47,16 @@ const TablePage = ({ currentTimesheetId }) => {
 			})
 			.catch((error) => {
 				console.error("Error:", error);
-				// Handle errors
+				if (
+					error.response &&
+					(error.response.status === 404 || error.response.status === 500)
+				) {
+					navigate("/my-timesheets");
+				}
+				if (error.response && error.response.status === 401) {
+					navigate("/");
+				}
+				// Handle other errors
 			});
 	}
 
@@ -77,7 +87,12 @@ const TablePage = ({ currentTimesheetId }) => {
 			// getTimeSheet(true);
 			// window.location.reload();
 		} catch (error) {
+			if (error.response && error.response.status === 401) {
+				navigate("/");
+			}
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -124,6 +139,8 @@ const TablePage = ({ currentTimesheetId }) => {
 					order={order}
 					setOrder={setOrder}
 					newRecord={NewRecord}
+					setLoading={setLoading}
+					loading={loading}
 				/>
 				<MainTable
 					tableData={tableData}

@@ -2,8 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "../api/axios";
+import { useNavigate } from "react-router-dom";
+import Loading from "./Loading.jsx";
 
-const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
+const AddRowModal = ({
+	isOpen,
+	onClose,
+	order,
+	setOrder,
+	newRecord,
+	loading,
+	setLoading,
+}) => {
 	const ORDERSAPI = "/orders";
 	const GRANTSAPI = "/grants";
 	const [grants, setGrants] = useState([]);
@@ -16,6 +26,8 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 		orderName: "",
 		orderId: "",
 	});
+
+	const navigate = useNavigate();
 
 	async function getGrants() {
 		try {
@@ -41,6 +53,9 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 			);
 			setOrders(response.data);
 		} catch (error) {
+			if (error.response && error.response.status === 401) {
+				navigate("/");
+			}
 			console.log(error);
 		}
 	}
@@ -55,25 +70,6 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 			getOrders(selectedGrant.grantId);
 		}
 	}, [selectedGrant]);
-
-	// const handleOrderChange = (dropdown, value) => {
-	// 	const currentSelectedOrder = orders.find(
-	// 		(element) => element.order_id === value
-	// 	);
-
-	// 	if (currentSelectedOrder) {
-	// 		setSelectedOrder({
-	// 			orderName: currentSelectedOrder.description,
-	// 			orderId: currentSelectedOrder.order_id,
-	// 		});
-	// 	} else {
-	// 		// Handle the case when no order is selected
-	// 		setSelectedOrder({
-	// 			orderName: "", // Clear the orderName
-	// 			orderId: "", // Clear the orderId
-	// 		});
-	// 	}
-	// };
 
 	const handleOrderChange = (dropdown, value) => {
 		const selectedOrderId = orders.find(
@@ -104,6 +100,7 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 	};
 
 	const handleSubmit = () => {
+		setLoading(true);
 		setOrder({
 			description: selectedGrant.grantName,
 			order_id: selectedOrder.orderId,
@@ -118,11 +115,15 @@ const AddRowModal = ({ isOpen, onClose, order, setOrder, newRecord }) => {
 		return <p>Loading...</p>;
 	}
 
+	if (loading) {
+		return <Loading />;
+	}
+
 	return (
 		<div
 			className={`modal ${
 				isOpen && orders
-					? "block absolute w-screen px-10 overflow-x-hidden  h-[100%] -ml-[20px] backdrop-blur-lg"
+					? "block absolute top-0 w-screen px-10 overflow-x-hidden  min-h-screen -ml-[20px] backdrop-blur-lg"
 					: "hidden"
 			}`}
 		>

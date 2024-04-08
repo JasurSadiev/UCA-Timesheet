@@ -22,6 +22,12 @@ const Approve = ({ currentTimesheetIdManager, accessToken }) => {
 			.then((response) => {
 				console.log(response);
 				navigate("/pending-timesheets");
+			})
+			.catch((error) => {
+				console.log(error);
+				if (error.response && error.response.status === 401) {
+					navigate("/");
+				}
 			});
 	}
 	return (

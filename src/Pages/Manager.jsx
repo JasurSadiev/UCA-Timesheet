@@ -12,9 +12,9 @@ const Manager = ({ currentTimesheetIdManager }) => {
 	const navigate = useNavigate();
 	const accessToken = auth.accessToken;
 	const MANAGERTIMESHEETS = "/user/manager/timesheets";
-
-	console.log(timesheets);
-
+	if (!currentTimesheetIdManager) {
+		navigate("/pending-timesheets");
+	}
 	useEffect(() => {
 		try {
 			axios
@@ -29,9 +29,9 @@ const Manager = ({ currentTimesheetIdManager }) => {
 					setTimesheets(response.data);
 				});
 		} catch (error) {
-			console.log(error);
+			console.log(error.response);
 		}
-	}, [accessToken]);
+	}, [accessToken, currentTimesheetIdManager]);
 
 	return (
 		<>
@@ -40,12 +40,12 @@ const Manager = ({ currentTimesheetIdManager }) => {
 					<Navbar />
 					{/* <WelcomeBack /> */}
 					<Review currentTimesheetIdManager={currentTimesheetIdManager} />
-					{timesheets.status !== "approved" && (
+					{/* {timesheets.status !== "approved" && (
 						<Buttons
 							currentTimesheetIdManager={currentTimesheetIdManager}
 							accessToken={accessToken}
 						/>
-					)}
+					)} */}
 				</div>
 			) : (
 				<p>Loading</p>

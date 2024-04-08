@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from "react";
-
+import { useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import { v4 as uuidv4 } from "uuid";
 import { getWeekOfDay } from "../HolidaysAndWeekends";
@@ -32,6 +32,8 @@ const MainTableManager = ({
 
 	const UPDATE_DAILY_HOURS_API = "/daily-hours";
 
+	const navigate = useNavigate();
+
 	function modalState() {
 		setisOpen(!isOpen);
 	}
@@ -62,6 +64,9 @@ const MainTableManager = ({
 			console.log("Update Successful");
 			// Handle success, update state, or perform other actions
 		} catch (error) {
+			if (error.response && error.response.status === 401) {
+				navigate("/");
+			}
 			console.error("Error updating data", error);
 			// Handle error, show an error message, or perform other actions
 		}
@@ -379,7 +384,7 @@ const MainTableManager = ({
 	};
 
 	return (
-		<div className=' max-w-screen mt-[50px] pb-10'>
+		<div className=' max-w-screen mt-[50px] pb-10 overflow-x-hidden'>
 			<table className='max-w-screen'>
 				<thead>
 					<tr>{generateFirstRowHeaders()}</tr>

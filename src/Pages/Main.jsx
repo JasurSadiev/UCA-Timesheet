@@ -20,6 +20,8 @@ const Main = () => {
 
 	const USERINFO = "/user/me";
 
+	console.log(pendings);
+
 	// console.log(userInfo);
 	useEffect(() => {
 		const fetchData = async () => {
@@ -33,11 +35,13 @@ const Main = () => {
 					},
 				});
 
-				console.log(response.data);
 				// Update the state with the number of pending timesheets
 				setPendings(response.data.length);
 			} catch (error) {
 				console.error("Error fetching data:", error);
+				if (error.response.status === 401) {
+					navigate("/");
+				}
 			}
 		};
 
@@ -45,36 +49,43 @@ const Main = () => {
 		if (userInfo) {
 			fetchData();
 		}
-	}, []);
+	}, [userInfo]);
 
 	useEffect(() => {
-		try {
-			axios
-				.get(USERINFO, {
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-						"Content-Type": "application/json",
-						withCredentials: true,
-					},
-				})
-				.then((response) => {
-					setUserInfo(response.data);
-					setAuth((prevData) => ({ ...prevData, userInfo: response.data }));
-					setLoading(false);
-				})
-				.catch((error) => {
-					console.log(error);
-					setLoading(false);
-				});
-		} catch (error) {
-			console.log(error);
-			setLoading(false);
+		if (accessToken) {
+			try {
+				axios
+					.get(USERINFO, {
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+							"Content-Type": "application/json",
+							withCredentials: true,
+						},
+					})
+					.then((response) => {
+						setUserInfo(response.data);
+						setAuth((prevData) => ({ ...prevData, userInfo: response.data }));
+						setLoading(false);
+					})
+					.catch((error) => {
+						console.log(error);
+						setLoading(false);
+						if (error.response.status === 401) {
+							navigate("/");
+						}
+					});
+			} catch (error) {
+				console.error("Error:", error);
+
+				// Handle other errors
+				setLoading(false);
+			}
 		}
 	}, [accessToken]);
 
 	return (
 		<>
-			{loading ? (
+			{loading && userInfo ? (
 				<p>Loading...</p>
 			) : userInfo ? (
 				<div className='flex bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700] h-screen  w-screen overflow-hidden flex-col'>
@@ -89,7 +100,7 @@ const Main = () => {
 						</p>
 						{/* <Logout /> */}
 					</div>
-					<div className='mt-[20%] ml-10 flex gap-x-10 text-center'>
+					<div className='mt-[15%] ml-10 flex gap-x-10 text-center'>
 						<Link
 							to={"/my-timesheets"}
 							className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
@@ -102,7 +113,7 @@ const Main = () => {
 							className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
 						>
 							<p className='text-black mt-4'>Inbox</p>
-							<span className='text-white font-medium text-[12px] bg-[#FA7E7E] rounded-full px-[10px] py-[6px] ml-[40%]'>
+							<span className='text-white font-medium text-[12px] bg-[#FA7E7E] rounded-full px-[12px] py-[6px] ml-[40%]'>
 								{pendings}
 							</span>
 							<img src={InboxLogo} alt='' className=' m-auto' />
