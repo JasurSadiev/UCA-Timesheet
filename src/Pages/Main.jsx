@@ -6,6 +6,7 @@ import useAuth from "../hooks/useAuth";
 import TimesheetLogo from "../assets/timesheet_logo.svg";
 import InboxLogo from "../assets/inbox_logo.svg";
 import ReportLogo from "../assets/reportLogo.svg";
+import WorkingHoursIcon from "../assets/WorkingHoursIcon.svg";
 import Navbar, { Logout } from "../Components/Navbar";
 
 const Main = () => {
@@ -134,6 +135,17 @@ const Main = () => {
 						>
 							<p className='text-black mt-4'>Holidays</p>
 							<img src={TimesheetLogo} alt='' className='w-1/2 m-auto mt-4' />
+						</Link>
+						<Link
+							to={"/working-hours"}
+							className='w-[200px] h-[200px] text-[22px] shadow-md font-semibold my-auto bg-white rounded-2xl'
+						>
+							<p className='text-black mt-4'>Working Hours</p>
+							<img
+								src={WorkingHoursIcon}
+								alt=''
+								className='w-1/2 m-auto mt-4'
+							/>
 						</Link>
 					</div>
 				</div>

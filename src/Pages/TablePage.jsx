@@ -14,6 +14,7 @@ const TablePage = ({ currentTimesheetId }) => {
 	const [days, setDays] = useState(30);
 	const [timeSheet, setTimeSheet] = useState(false);
 	const [updateTimeSheet, setUpdateTimeSheet] = useState(false);
+	const [monthlyWorkingHours, setMonthlyWorkingHours] = useState("");
 	const [isOpen, setisOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [order, setOrder] = useState({});
@@ -24,8 +25,6 @@ const TablePage = ({ currentTimesheetId }) => {
 
 	const apiUrl = `/timesheets/${currentTimesheetId}`;
 	let accessToken = auth.accessToken;
-
-	console.log(tableData);
 
 	function getTimesheet() {
 		axios
@@ -62,9 +61,11 @@ const TablePage = ({ currentTimesheetId }) => {
 
 	useEffect(() => {
 		getTimesheet();
+		if (tableData) {
+			fetchMonthlyWorkingHours();
+		}
 	}, []);
 
-	console.log(order.order_id);
 	const NewRecord = async () => {
 		const timesheetId = tableData.timesheet_id;
 		const randomNumber = (Math.floor(Math.random() * 100000) + 1).toString();
@@ -101,12 +102,43 @@ const TablePage = ({ currentTimesheetId }) => {
 		return <p>Loading...</p>;
 	}
 
-	// console.log(tableData[0].author.city);
+	function fetchMonthlyWorkingHours() {
+		if (tableData) {
+			let month = tableData.month;
+			let year = tableData.year;
+			axios
+				.get(`/monthly-working-hours/country/${tableData.author.country_id}`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"Content-Type": "application/json",
+						withCredentials: true,
+					},
+				})
+				.then((response) => {
+					setMonthlyWorkingHours(
+						response.data.filter(
+							(entry) => entry.month === month && entry.year === year
+						)
+					);
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		}
+	}
+
+	console.log(monthlyWorkingHours);
 
 	return (
 		<div className='flex flex-col max-w-screen'>
 			<Navbar />
 			<Status status={tableData.status} />
+			<span className='text-right mr-4 -mt-4'>
+				Monthly Working Hours:{" "}
+				{monthlyWorkingHours
+					? `${monthlyWorkingHours[0].working_hours} hours`
+					: "Loading..."}
+			</span>
 			<h1 className='text-center mb-10 text-3xl font-bold mt-[20px]'>
 				University of Central Asia
 			</h1>

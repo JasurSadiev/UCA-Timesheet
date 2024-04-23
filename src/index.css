@@ -28,3 +28,7 @@ td {
 #navLinks {
 	color: black;
 }
+
+input[type="number"]::-webkit-inner-spin-button {
+	display: none;
+}

@@ -14,6 +14,7 @@ import ListOfTimesheetsManager from "./Pages/ListOfTimeSheetsManager";
 import UserSettings from "./Pages/UserSettings";
 import ListOfHolidays from "./Pages/HolidaysList";
 import SignUp from "./Pages/SignUp";
+import WorkingHours from "./Pages/WorkingHours";
 
 const ROLES = {
 	User: 2001,
@@ -53,6 +54,7 @@ function App() {
 
 				<Route path={`settings/`} element={<UserSettings />} />
 				<Route path={`holidays/`} element={<ListOfHolidays />} />
+				<Route path={`working-hours/`} element={<WorkingHours />} />
 
 				<Route
 					path='pending-timesheets'

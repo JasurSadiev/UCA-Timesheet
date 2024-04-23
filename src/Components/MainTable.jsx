@@ -32,6 +32,7 @@ const MyTable = ({
 	const [loading, setLoading] = useState(false);
 
 	const [tableTotal, setTableTotal] = useState(Array(days + 2).fill(0));
+	const [percentages, setPercentages] = useState([]);
 	const randomId = uuidv4();
 	const navigate = useNavigate();
 
@@ -40,6 +41,23 @@ const MyTable = ({
 
 	function modalState() {
 		setisOpen(!isOpen);
+	}
+
+	console.log(percentages);
+
+	function calculatePercentage(rowNumber) {
+		const monthlyWorkingHours = 196;
+
+		// for (let i = 0; i < totalHours.length; i++) {
+		// 	return ((totalHours[i] / monthlyWorkingHours) * 100).toFixed(1);
+		// }
+
+		const calculatedPercentage = (
+			(totalHours[rowNumber] / monthlyWorkingHours) *
+			100
+		).toFixed(1);
+		// setPercentages([...percentages, calculatedPercentage]); // Update state with new percentage
+		return calculatedPercentage;
 	}
 
 	function submitTimesheet() {
@@ -261,7 +279,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						value={tableData.records[rowIndex].grant_id ?? ""}
 						onChange={(e) =>
 							handleInputChange(
@@ -276,7 +294,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						value={tableData.records[rowIndex].order_id || ""}
 						onChange={(e) =>
 							handleInputChange(rowIndex, "Internal Order", e.target.value)
@@ -287,7 +305,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						value={tableData.records[rowIndex].grand_description || ""}
 						onChange={(e) =>
 							handleInputChange(rowIndex, "Name", e.target.value)
@@ -298,7 +316,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						value={tableData.records[rowIndex].balance || ""}
 						onChange={(e) =>
 							handleInputChange(rowIndex, "Budget", e.target.value)
@@ -309,7 +327,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						// value={tableData[0].records[rowIndex].start_date || ""}
 						value={
 							new Date(
@@ -329,7 +347,7 @@ const MyTable = ({
 				<td className='max-w-[200px] w-[125px]'>
 					<input
 						type='text'
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						value={
 							new Date(tableData.records[rowIndex].end_date).toLocaleDateString(
 								"en-US",
@@ -348,16 +366,16 @@ const MyTable = ({
 				</td>
 				<td className='max-w-[100px] w-[50px]'>
 					<input
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						type='text'
-						value={tableData[rowIndex]?.["%"] || ""}
+						value={calculatePercentage(rowIndex)}
 						onChange={(e) => handleInputChange(rowIndex, "%", e.target.value)}
 						className='w-[100%] focus:border-none active:border-none focus:outline-none text-center text-[14px]'
 					/>
 				</td>
 				<td className='max-w-[50px] w-[25px]'>
 					<input
-						disabled={tableData.status === "approved"}
+						disabled={true}
 						type='text'
 						value={totalHours[rowIndex]}
 						onChange={(e) =>
@@ -371,12 +389,18 @@ const MyTable = ({
 					<td key={colIndex} className=''>
 						<input
 							disabled={tableData.status === "approved"}
-							type='text'
+							type='number'
+							min='0'
 							value={
 								tableData.records[rowIndex].daily_hours[colIndex].hours
 									? tableData.records[rowIndex].daily_hours[colIndex].hours
 									: ""
 							}
+							onKeyDown={(e) => {
+								if (e.key === "-" || e.key === "e") {
+									e.preventDefault();
+								}
+							}}
 							onChange={(e) =>
 								handleInputChange(rowIndex, colIndex + 1, e.target.value)
 							}

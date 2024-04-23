@@ -5,6 +5,7 @@ import axios from "../api/axios";
 const AddNewUserForm = () => {
 	const auth = useAuth();
 	const [countries, setCountries] = useState(null);
+	const [allUsers, setAllUsers] = useState([]);
 	const [userInfo, setUserInfo] = useState({
 		firstName: "",
 		lastName: "",
@@ -13,7 +14,9 @@ const AddNewUserForm = () => {
 		city: "",
 		department: "",
 		position: "",
+		manager_id: "",
 		sapID: "",
+		isAdmin: false,
 	});
 
 	const accessToken = auth.accessToken;
@@ -34,6 +37,25 @@ const AddNewUserForm = () => {
 		fetchData();
 	}, []);
 
+	useEffect(() => {
+		const fetchUsers = async () => {
+			try {
+				const response = await axios.get("/admin/users", {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				});
+				setAllUsers(response.data);
+			} catch (error) {
+				console.error("Error fetching users:", error);
+			}
+		};
+		fetchUsers();
+	}, [accessToken]);
+
+	console.log(allUsers.users);
+	console.log(userInfo);
+
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setUserInfo((prevUserInfo) => ({
@@ -53,13 +75,13 @@ const AddNewUserForm = () => {
 					department: userInfo.department,
 					email: userInfo.email,
 					first_name: userInfo.firstName,
-					is_admin: true,
+					is_admin: Boolean(userInfo.isAdmin),
 					last_name: userInfo.lastName,
-					manager_id: 0,
+					manager_id: Number(userInfo.manager_id),
 					password: "qwerty",
 					position: userInfo.position,
 					sap_id: userInfo.sapID,
-					shift_id: 0,
+					shift_id: 1,
 				},
 				{
 					headers: {
@@ -78,6 +100,7 @@ const AddNewUserForm = () => {
 				department: "",
 				position: "",
 				sapID: "",
+				manager_id: "",
 			});
 		} catch (error) {
 			console.error("Error creating user:", error);
@@ -96,7 +119,7 @@ const AddNewUserForm = () => {
 		: [];
 
 	return (
-		<div className=' max-h-screen max-w-screen bg-white flex flex-col mt-[3%] p-[30px] text-[16px] overflow-x-hidden mb-8 rounded-lg shadow-lg'>
+		<div className='h-fit overflow-hidden bg-white flex flex-col mt-[3%] p-[30px] text-[16px]  mb-8 rounded-lg shadow-lg'>
 			<h2 className='font-medium text-[16px] mb-4'>Add New User:</h2>
 			<hr className='mb-2' />
 			<form onSubmit={handleSubmit}>
@@ -198,7 +221,7 @@ const AddNewUserForm = () => {
 						className='border-[#9DACC3] border-2 rounded-md px-2 py-0.5 min-w-[500px] mr-16'
 					/>
 				</div>
-				<div className='flex justify-between mb-6'>
+				<div className='flex justify-between mb-4'>
 					<p className='font-medium'>SAP ID</p>
 					<input
 						type='text'
@@ -209,6 +232,61 @@ const AddNewUserForm = () => {
 						className='border-[#9DACC3] border-2 rounded-md px-2 py-0.5 min-w-[500px] mr-16'
 					/>
 				</div>
+				<div className='flex justify-between mb-4 text-center'>
+					<label
+						htmlFor='manager_id'
+						className='font-medium text-center my-auto'
+					>
+						Manager
+					</label>
+					<select
+						value={userInfo.manager_id}
+						onChange={handleChange}
+						name='manager_id'
+						className='border-[#9DACC3] border-2 rounded-md px-2 py-1  min-w-[500px] mr-16'
+					>
+						<option value='' className=''>
+							Select a manager
+						</option>
+						{allUsers.users &&
+							allUsers.users.map((user) => (
+								<option key={user.id} value={user.id}>
+									{user.first_name}
+									{user.last_name}
+								</option>
+							))}
+					</select>
+				</div>
+
+				<div className='flex justify-start gap-x-32 mb-6'>
+					<label htmlFor='is-admin-yes' className='font-medium'>
+						Is Admin
+					</label>
+					<fieldset className='flex gap-x-10 text-[18px] font-normal'>
+						<legend className='sr-only'>Is Admin</legend>
+						<label>
+							<input
+								type='radio'
+								name='isAdmin'
+								value='true'
+								required
+								onChange={handleChange}
+							/>{" "}
+							Yes
+						</label>
+						<label>
+							<input
+								type='radio'
+								name='isAdmin'
+								value='false'
+								required
+								onChange={handleChange}
+							/>{" "}
+							No
+						</label>
+					</fieldset>
+				</div>
+
 				<button
 					type='submit'
 					className='w-[200px] py-1 rounded-lg bg-black text-white'

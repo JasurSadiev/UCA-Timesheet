@@ -93,6 +93,33 @@ const ListOfTimesheets = ({ setCurrentTimesheetId }) => {
 		return months[monthId - 1];
 	}
 
+	const handleDeleteTimesheet = (id, status) => {
+		const confirmDelete = window.confirm(
+			"Are you sure you want to delete this timesheet?"
+		);
+		if (confirmDelete && status === "draft") {
+			axios
+				.delete(`/timesheets/${id}`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+				.then((response) => {
+					console.log("Deleted successfully:", response);
+					setTimesheets(
+						timesheets.filter((timesheet) => timesheet.timesheet_id !== id)
+					);
+					// Handle success
+				})
+				.catch((error) => {
+					console.error("Error deleting:", error);
+					// Handle error
+				});
+		} else {
+			window.alert("timesheet is not a draft");
+		}
+	};
+
 	return (
 		<div className='max-w-screen min-h-screen max-h-fit pb-4 flex flex-col overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
 			<Navbar />
@@ -128,6 +155,7 @@ const ListOfTimesheets = ({ setCurrentTimesheetId }) => {
 						<th className='border-[#EBEFF5] font-semibold'>Month</th>
 						<th className='border-[#EBEFF5] font-semibold'>Year</th>
 						<th className='border-[#EBEFF5] font-semibold'>Status</th>
+						<th className='border-[#EBEFF5] font-semibold'></th>
 						<th className='border-[#EBEFF5] font-semibold'></th>
 					</tr>
 				</thead>
@@ -171,6 +199,17 @@ const ListOfTimesheets = ({ setCurrentTimesheetId }) => {
 											Open
 										</Link>
 									)}
+								</td>
+								<td
+									className='bg-red-500 text-white'
+									onClick={() =>
+										handleDeleteTimesheet(
+											timesheet.timesheet_id,
+											timesheet.status
+										)
+									}
+								>
+									Delete
 								</td>
 							</tr>
 						))}

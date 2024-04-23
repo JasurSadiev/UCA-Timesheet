@@ -84,6 +84,31 @@ const ListOfHolidays = () => {
 		  )
 		: [];
 
+	const handleDeleteHoliday = (id) => {
+		const confirmDelete = window.confirm(
+			"Are you sure you want to delete this Holiday?"
+		);
+		if (confirmDelete) {
+			axios
+				.delete(`/holidays/${id}`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+				.then((response) => {
+					console.log("Deleted successfully:", response);
+					setHolidays(holidays.filter((holiday) => holiday.id !== id));
+					// Handle success
+				})
+				.catch((error) => {
+					console.error("Error deleting:", error);
+					// Handle error
+				});
+		} else {
+			window.alert("timesheet is not a draft");
+		}
+	};
+
 	return (
 		<div className='w-screen min-h-screen flex flex-col overflow-x-hidden bg-gradient-to-bl from-[#d8e7f5] to-[#afcce700]'>
 			<Navbar />
@@ -156,6 +181,12 @@ const ListOfHolidays = () => {
 								<td className={`border-[#efe9e9] py-1  `}>{holiday.name}</td>
 								<td className=' py-1.5 border-[#efe9e9] '>
 									{findCountryNameById(holiday.country_id)}
+								</td>
+								<td
+									onClick={() => handleDeleteHoliday(holiday.id)}
+									className='border-[#EBEFF5] py-1 bg-red-700 text-white'
+								>
+									Delete
 								</td>
 							</tr>
 						))}

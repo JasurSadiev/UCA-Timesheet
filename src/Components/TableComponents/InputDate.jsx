@@ -8,6 +8,7 @@ const InputDate = ({ labelText, value }) => {
 					type='text'
 					className='w-12 h-10 border-2 text-xl border-black text-center'
 					value={value}
+					disabled={true}
 				/>
 				{/* <input
 					type='text'

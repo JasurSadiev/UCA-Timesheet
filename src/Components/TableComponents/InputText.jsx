@@ -7,6 +7,7 @@ const InputText = ({ labelText, value }) => {
 				type='text'
 				className='border-b-[3px] text-xl border-black focus:border-b-4 active:border-b-4 focus:outline-none text-center'
 				value={value}
+				disabled={true}
 			/>
 			<label htmlFor='' className='text-center'>
 				{labelText}
